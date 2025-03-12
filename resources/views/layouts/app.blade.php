@@ -8,7 +8,9 @@
 
     <title>{{ $title }} | EC Projects</title>
     <link rel="shortcut icon" href="{{ asset('assets/ecpr logo.png') }}" type="image/x-icon">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -23,12 +25,15 @@
 </head>
 
 <body class="antialiased">
-    <div class="min-h-screen bg-mine-100 font-inter">
-        @include('layouts.navigation')
+    <div class="flex h-screen max-w-full max-h-screen min-h-screen bg-mine-100 font-inter">
+        @include('layouts.sidebar')
 
         <!-- Page Content -->
-        <main>
-            {{ $slot }}
+        <main class="flex flex-col w-full h-screen max-w-full gap-4 p-4 pl-28 md:pl-64">
+            @include('layouts.navigation')
+            <div class="relative z-20 w-full h-full max-w-full p-4 overflow-y-auto bg-white rounded-lg">
+                {{ $slot }}
+            </div>
         </main>
     </div>
 </body>

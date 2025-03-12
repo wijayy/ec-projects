@@ -4,7 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
+use App\Models\HakAkses;
 use App\Models\Role;
+use App\Models\RolesHakAkses;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class RoleController extends Controller
 {
@@ -13,7 +18,10 @@ class RoleController extends Controller
      */
     public function index()
     {
-        //
+        $users = User::all();
+        $role = Role::all();
+        $hakAkses = HakAkses::all();
+        return view('role.index', compact('users', 'role', 'hakAkses'));
     }
 
     /**
@@ -27,9 +35,37 @@ class RoleController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreRoleRequest $request)
+    public function store(Request $request)
     {
-        //
+        $validated = $request->validateWithBag('tambahRole', [
+            'nama' => 'required|string',
+            'option' => 'nullable|array',
+            'option.*' => 'integer'
+        ]);
+
+        // dd($validated);
+
+        try {
+            DB::beginTransaction();
+            $role = Role::create($validated);
+
+            foreach ($validated['option'] as $key => $item) {
+                RolesHakAkses::create([
+                    'role_id' => $role->id,
+                    'hak_akses_id' => $item
+                ]);
+            }
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            if (config('app.debug') == true) {
+                throw $th;
+            } else {
+                return back()->with('error', $th->getMessage());
+            }
+        }
+
+        return back()->with('success', "Role Berhasil dibuat");
     }
 
     /**
@@ -61,6 +97,21 @@ class RoleController extends Controller
      */
     public function destroy(Role $role)
     {
-        //
+        try {
+            DB::beginTransaction();
+            User::where('role_id', $role->id)->update(['role_id' => null]);
+            RolesHakAkses::where('role_id', $role->id)->delete();
+
+            $role->delete();
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            if (config('app.debug') == true) {
+                throw $th;
+            } else {
+                return back()->with('error', $th->getMessage());
+            }
+        }
+        return back()->with('success', "Role Berhasil dihapus");
     }
 }

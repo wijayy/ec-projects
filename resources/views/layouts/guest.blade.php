@@ -23,11 +23,11 @@
 </head>
 
 <body class="antialiased text-gray-900 font-inter">
-    <div class="flex flex-col items-center pt-6 min-h-screen bg-gray-100 sm:justify-center sm:pt-0">
-        <div class="overflow-hidden px-6 py-4 mt-6 w-full bg-white shadow-md sm:max-w-md sm:rounded-lg">
-            <div class="flex justify-center pb-4 w-full">
+    <div class="flex flex-col items-center justify-center min-h-screen pt-4 bg-mine-100">
+        <div class="w-full max-w-md px-6 py-4 mt-6 overflow-hidden bg-white rounded-lg shadow-md">
+            <div class="flex justify-center w-full pb-4">
                 <a href="/">
-                    <x-application-logo class="w-20 h-20 bg-black rounded-lg" />
+                    <x-application-logo class="w-20 h-20 rounded-lg bg-mine-200" />
                 </a>
             </div>
             {{ $slot }}

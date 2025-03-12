@@ -18,11 +18,13 @@ export default {
             },
             colors: {
                 mine: {
-                    100: "#F5F7F8",
-                    200: "#F4CE14",
-                    300: "#379777",
-                    400: "#45474B",
+                    100: "#EAF6F6",
+                    200: "#66BFBF",
+                    300: "#FF0063",
                 },
+            },
+            boxShadow: {
+                mine: "4px 4px 10px rgba(0, 0, 0, 0.2)",
             },
         },
     },

@@ -17,7 +17,8 @@ class HakAksesFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'nama' => fake()->sentence(2, false),
+            'deskripsi' => fake()->sentence(6, false),
         ];
     }
 }

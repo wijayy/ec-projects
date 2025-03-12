@@ -5,6 +5,7 @@ namespace App\Models;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class HakAkses extends Model
 {
@@ -28,5 +29,11 @@ class HakAkses extends Model
                 'source' => 'nama'
             ]
         ];
+    }
+    protected $guarded = ['id'];
+
+    public function roleHakAkses(): HasMany
+    {
+        return $this->hasMany(RolesHakAkses::class);
     }
 }
