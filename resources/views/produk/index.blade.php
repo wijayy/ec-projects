@@ -1,10 +1,10 @@
 <x-app-layout title="Semua Produk">
     <div class="flex justify-end">
-        <x-primary-button x-data="" @click.prevent="$dispatch('open-modal', 'tambah-produk')">Tambah
-            Produk</x-primary-button>
+        <x-primary-a href="{{ route('produk.create') }}" x-data="">Tambah
+            Produk</x-primary-a>
     </div>
-    <div class="w-full p-4 mt-4 space-y-4 rounded-lg shadow-mine">
-        <div class="flex w-full gap-4 p-1">
+    <div class="w-full p-4 mt-4 space-y-4 overflow-x-auto rounded-lg shadow-mine">
+        <div class="flex w-full gap-4 p-1 min-w-[700px]">
             <div class="sr-only">Header</div>
             <div class="w-10 text-center">#</div>
             <div class="w-1/4">Nama Produk</div>
@@ -13,13 +13,13 @@
             <div class="w-1/4 text-center">Action</div>
         </div>
         @foreach ($produk as $item)
-            <div class="flex w-full gap-4 p-1 even:bg-stone-100 h-fit">
+            <div class="flex w-full gap-4 p-1 min-w-[700px] rounded-lg odd:bg-white even:bg-stone-100 h-fit">
                 <div class="sr-only">Content</div>
                 <div class="w-10 text-center">{{ $loop->iteration }} </div>
                 <div class="w-1/4">{{ $item->nama }} </div>
                 <div class="w-1/4">{{ $item->deskripsi }} </div>
                 <div class="flex flex-wrap w-full gap-2">
-                    @foreach ($item->stok as $itm)
+                    @foreach ($item->stoks as $itm)
                         <div
                             class="p-1 rounded h-fit shadow-mine  {{ $itm->stok < 5 ? 'bg-mine-300 text-white' : 'bg-mine-100' }}">
                             {{ $itm->size }} {{ $itm->color ? "- $itm->color" : '' }}
@@ -29,8 +29,8 @@
                     @endforeach
                 </div>
                 <div class="flex justify-center w-1/4 gap-2">
-                    <x-action-a class="bg-mine-200 " x-data=""
-                        @click.prevent="$dispatch('open-modal', 'tambah-stok-{{ $loop->iteration }}')">
+                    <x-action-a class="bg-mine-200 " href="{{ route('produk.edit-stok', ['produk' => $item->slug]) }}"
+                        x-data="">
                         <x-action-label>Tambah Stok</x-action-label>
                         <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none"
                             xmlns="http://www.w3.org/2000/svg">
@@ -42,8 +42,7 @@
                             </g>
                         </svg>
                     </x-action-a>
-                    <x-action-a href="" x-data=""
-                        @click.prevent="$dispatch('open-modal', 'edit-produk-{{ $loop->iteration }}')"
+                    <x-action-a href="{{ route('produk.edit', ['produk' => $item->slug]) }}" x-data=""
                         class="bg-yellow-300">
                         <x-action-label>Edit Produk</x-action-label>
                         <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none"
@@ -61,292 +60,10 @@
                     <x-action-set :delete="route('profile.destroy')"></x-action-set>
                 </div>
             </div>
-            <x-modal name="tambah-stok-{{ $loop->iteration }}" :title="'Update Stok pada Produk ' . $item->nama" :show="false" :maxWidth="'5xl'">
-                <form action="{{ route('produk.update-stok', ['produk' => $item->slug]) }}" method="post">
-                    @csrf
-                    <div class="grid grid-cols-1 gap-4 mt-6 sm:grid-cols-2 xl:grid-cols-4">
-                        @foreach ($item->stok as $itm)
-                            <div class="p-2 border rounded-lg md:p-4 shadow-mine border-mine-200">
-                                <input type="hidden" name="variasi[{{ $loop->index }}][id]'"
-                                    value="{{ $itm->id }}">
-                                <div class="w-full">
-                                    <x-input-label for="size" :value="__('size')" />
-                                    <x-text-input id="size" readonly class="block w-full mt-1" type="text"
-                                        name="variasi[{{ $loop->index }}][size]'" :value="old('size', $itm->size)" required autofocus
-                                        autocomplete="size" />
-                                    <x-input-error :messages="$errors->tambahStok->get('size')" class="mt-2" />
-                                </div>
-                                <div class="w-full">
-                                    <x-input-label for="color" :value="__('color')" />
-                                    <x-text-input id="color" readonly class="block w-full mt-1" type="text"
-                                        name="variasi[{{ $loop->index }}][color]'" :value="old('color', $itm->color)" required
-                                        autofocus autocomplete="color" />
-                                    <x-input-error :messages="$errors->tambahStok->get('color')" class="mt-2" />
-                                </div>
-                                <div class="w-full">
-                                    <x-input-label for="arm" :value="__('arm length')" />
-                                    <x-text-input id="arm" readonly class="block w-full mt-1" type="text"
-                                        name="variasi[{{ $loop->index }}][arm]'" :value="old('arm', $itm->arm)" required autofocus
-                                        autocomplete="arm" />
-                                    <x-input-error :messages="$errors->tambahStok->get('arm')" class="mt-2" />
-                                </div>
-                                <div class="w-full">
-                                    <x-input-label for="stok" :value="__('stok')" />
-                                    <x-text-input id="stok" class="block w-full mt-1" type="number"
-                                        name="variasi[{{ $loop->index }}][stok]'" :value="old('stok', $itm->stok)" required
-                                        autofocus autocomplete="stok" />
-                                    <x-input-error :messages="$errors->tambahStok->get('stok')" class="mt-2" />
-                                </div>
-                                <div class="w-full">
-                                    <x-input-label for="harga" :value="__('harga')" />
-                                    <x-text-input id="harga" class="block w-full mt-1" type="number"
-                                        name="variasi[{{ $loop->index }}][harga]'" :value="old('harga', $itm->harga)" required
-                                        autofocus autocomplete="harga" />
-                                    <x-input-error :messages="$errors->tambahStok->get('harga')" class="mt-2" />
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                    <div class="flex justify-center w-full">
-                        <x-primary-button class="mx-auto mt-4">Submit</x-primary-button>
-                    </div>
-                </form>
-            </x-modal>
-            <x-modal name="edit-produk-{{ $loop->iteration }}" :title="'Update Stok pada Produk ' . $item->nama" :show="false"
-                :maxWidth="'5xl'">
-                <form action="{{ route('produk.store') }}" method="post" x-data="productManager()">
-                    @csrf
-                    @foreach ($errors->all() as $item)
-                        <li>{{ $item }} </li>
-                    @endforeach
-                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                        <div class="w-full">
-                            <x-input-label for="nama" :value="__('nama produk')" />
-                            <x-text-input id="nama" class="block w-full mt-1" type="text" name="nama"
-                                :value="old('nama', $item->nama)" required autofocus autocomplete="nama produk" />
-                            <x-input-error :messages="$errors->tambahProduk->get('nama')" class="mt-2" />
-                        </div>
-                        <div class="w-full">
-                            <x-input-label for="deskripsi" :value="__('deskripsi')" />
-                            <x-text-input id="deskripsi" class="block w-full mt-1" type="text" name="deskripsi"
-                                :value="old('deskripsi', $item->deskripsi)" required autofocus autocomplete="deksripsi" />
-                            <x-input-error :messages="$errors->tambahProduk->get('deskripsi')" class="mt-2" />
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-4 mt-4 md:grid-cols-3">
-                        <div class="w-full">
-                            <x-input-label for="size" :value="__('size')" />
-                            <x-text-input id="size" x-model="sizeInput" @input="updateCombinations()"
-                                class="block w-full mt-1" type="text" name="size" :value="old('size')" required
-                                autofocus autocomplete="size" />
-
-                            <x-input-error :messages="$errors->tambahProduk->get('size')" class="mt-2" />
-                        </div>
-                        <div class="w-full">
-                            <x-input-label for="color" :value="__('color')" />
-                            <x-text-input id="color" x-model="colorInput" @input="updateCombinations()"
-                                class="block w-full mt-1" type="text" name="color" :value="old('color')" autofocus
-                                autocomplete="color" />
-                            <x-input-error :messages="$errors->tambahProduk->get('color')" class="mt-2" />
-                        </div>
-                        <div class="w-full">
-                            <x-input-label for="arm" :value="__('arm length')" />
-                            <x-text-input id="arm" x-model="armInput" @input="updateCombinations()"
-                                class="block w-full mt-1" type="text" name="arm" :value="old('arm')" autofocus
-                                autocomplete="arm" />
-                            <x-input-error :messages="$errors->tambahProduk->get('arm')" class="mt-2" />
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-4 mt-6 sm:grid-cols-2 xl:grid-cols-4">
-                        <template x-for="(combo, index) in combinations" :key="index">
-                            <div class="p-2 border rounded-lg md:p-4 shadow-mine border-mine-200">
-                                <div class="w-full">
-                                    <x-input-label for="size" :value="__('size')" />
-                                    <x-text-input id="size" readonly x-model="combo.size"
-                                        class="block w-full mt-1" type="text" ::name="'variasi[' + index + '][size]'" :value="old('size')"
-                                        required autofocus autocomplete="size" />
-                                    <x-input-error :messages="$errors->tambahProduk->get('size')" class="mt-2" />
-                                </div>
-                                <div class="w-full">
-                                    <x-input-label for="color" :value="__('color')" />
-                                    <x-text-input id="color" readonly x-model="combo.color"
-                                        class="block w-full mt-1" type="text" ::name="'variasi[' + index + '][color]'" :value="old('color')"
-                                        required autofocus autocomplete="color" />
-                                    <x-input-error :messages="$errors->tambahProduk->get('color')" class="mt-2" />
-                                </div>
-                                <div class="w-full">
-                                    <x-input-label for="arm" :value="__('arm length')" />
-                                    <x-text-input id="arm" readonly x-model="combo.arm"
-                                        class="block w-full mt-1" type="text" ::name="'variasi[' + index + '][arm]'" :value="old('arm')"
-                                        required autofocus autocomplete="arm" />
-                                    <x-input-error :messages="$errors->tambahProduk->get('arm')" class="mt-2" />
-                                </div>
-                                <div class="w-full">
-                                    <x-input-label for="stok" :value="__('stok')" />
-                                    <x-text-input id="stok" x-model="combo.stok" class="block w-full mt-1"
-                                        type="number" ::name="'variasi[' + index + '][stok]'" :value="old('stok')" required autofocus
-                                        autocomplete="stok" />
-                                    <x-input-error :messages="$errors->tambahProduk->get('stok')" class="mt-2" />
-                                </div>
-                                <div class="w-full">
-                                    <x-input-label for="harga" :value="__('harga')" />
-                                    <x-text-input id="harga" x-model="combo.harga" class="block w-full mt-1"
-                                        type="number" ::name="'variasi[' + index + '][harga]'" :value="old('harga')" required autofocus
-                                        autocomplete="harga" />
-                                    <x-input-error :messages="$errors->tambahProduk->get('harga')" class="mt-2" />
-                                </div>
-                            </div>
-                        </template>
-
-                    </div>
-                    <div class="flex justify-center w-full">
-                        <x-primary-button class="mx-auto mt-4">Submit</x-primary-button>
-                    </div>
-                </form>
-            </x-modal>
         @endforeach
     </div>
-    <x-modal name="tambah-produk" :title="'Tambah Produk'" :show="false" :maxWidth="'5xl'">
-        <form action="{{ route('produk.store') }}" method="post" x-data="productManager()">
-            @csrf
-            @foreach ($errors->all() as $item)
-                <li>{{ $item }} </li>
-            @endforeach
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div class="w-full">
-                    <x-input-label for="nama" :value="__('nama produk')" />
-                    <x-text-input id="nama" class="block w-full mt-1" type="text" name="nama"
-                        :value="old('nama')" required autofocus autocomplete="nama produk" />
-                    <x-input-error :messages="$errors->tambahProduk->get('nama')" class="mt-2" />
-                </div>
-                <div class="w-full">
-                    <x-input-label for="deskripsi" :value="__('deskripsi')" />
-                    <x-text-input id="deskripsi" class="block w-full mt-1" type="text" name="deskripsi"
-                        :value="old('deskripsi')" required autofocus autocomplete="deksripsi" />
-                    <x-input-error :messages="$errors->tambahProduk->get('deskripsi')" class="mt-2" />
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 mt-4 md:grid-cols-3">
-                <div class="w-full">
-                    <x-input-label for="size" :value="__('size')" />
-                    <x-text-input id="size" x-model="sizeInput" @input="updateCombinations()"
-                        class="block w-full mt-1" type="text" name="size" :value="old('size')" required autofocus
-                        autocomplete="size" />
-
-                    <x-input-error :messages="$errors->tambahProduk->get('size')" class="mt-2" />
-                </div>
-                <div class="w-full">
-                    <x-input-label for="color" :value="__('color')" />
-                    <x-text-input id="color" x-model="colorInput" @input="updateCombinations()"
-                        class="block w-full mt-1" type="text" name="color" :value="old('color')" autofocus
-                        autocomplete="color" />
-                    <x-input-error :messages="$errors->tambahProduk->get('color')" class="mt-2" />
-                </div>
-                <div class="w-full">
-                    <x-input-label for="arm" :value="__('arm length')" />
-                    <x-text-input id="arm" x-model="armInput" @input="updateCombinations()"
-                        class="block w-full mt-1" type="text" name="arm" :value="old('arm')" autofocus
-                        autocomplete="arm" />
-                    <x-input-error :messages="$errors->tambahProduk->get('arm')" class="mt-2" />
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 mt-6 sm:grid-cols-2 xl:grid-cols-4">
-                <template x-for="(combo, index) in combinations" :key="index">
-                    <div class="p-2 border rounded-lg md:p-4 shadow-mine border-mine-200">
-                        <div class="w-full">
-                            <x-input-label for="size" :value="__('size')" />
-                            <x-text-input id="size" readonly x-model="combo.size" class="block w-full mt-1"
-                                type="text" ::name="'variasi[' + index + '][size]'" :value="old('size')" required autofocus
-                                autocomplete="size" />
-                            <x-input-error :messages="$errors->tambahProduk->get('size')" class="mt-2" />
-                        </div>
-                        <div class="w-full">
-                            <x-input-label for="color" :value="__('color')" />
-                            <x-text-input id="color" readonly x-model="combo.color" class="block w-full mt-1"
-                                type="text" ::name="'variasi[' + index + '][color]'" :value="old('color')" required autofocus
-                                autocomplete="color" />
-                            <x-input-error :messages="$errors->tambahProduk->get('color')" class="mt-2" />
-                        </div>
-                        <div class="w-full">
-                            <x-input-label for="arm" :value="__('arm length')" />
-                            <x-text-input id="arm" readonly x-model="combo.arm" class="block w-full mt-1"
-                                type="text" ::name="'variasi[' + index + '][arm]'" :value="old('arm')" required autofocus
-                                autocomplete="arm" />
-                            <x-input-error :messages="$errors->tambahProduk->get('arm')" class="mt-2" />
-                        </div>
-                        <div class="w-full">
-                            <x-input-label for="stok" :value="__('stok')" />
-                            <x-text-input id="stok" x-model="combo.stok" class="block w-full mt-1"
-                                type="number" ::name="'variasi[' + index + '][stok]'" :value="old('stok')" required autofocus
-                                autocomplete="stok" />
-                            <x-input-error :messages="$errors->tambahProduk->get('stok')" class="mt-2" />
-                        </div>
-                        <div class="w-full">
-                            <x-input-label for="harga" :value="__('harga')" />
-                            <x-text-input id="harga" x-model="combo.harga" class="block w-full mt-1"
-                                type="number" ::name="'variasi[' + index + '][harga]'" :value="old('harga')" required autofocus
-                                autocomplete="harga" />
-                            <x-input-error :messages="$errors->tambahProduk->get('harga')" class="mt-2" />
-                        </div>
-                    </div>
-                </template>
-
-            </div>
-            <div class="flex justify-center w-full">
-                <x-primary-button class="mx-auto mt-4">Submit</x-primary-button>
-            </div>
-        </form>
-    </x-modal>
-
-    <script>
-        function productManager() {
-            return {
-                sizeInput: '',
-                colorInput: '',
-                armInput: '',
-                sizes: [],
-                colors: [],
-                arms: [],
-                combinations: [],
+    <div class="flex justify-between w-full mt-4">{{ $produk->links() }} </div>
 
 
-                updateCombinations() {
-                    // Ambil daftar ukuran (Size) → Harus ada
-                    let sizes = this.sizeInput.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
-                    if (sizes.length === 0) {
-                        this.combinations = []; // Kosongkan jika Size tidak ada
-                        return;
-                    }
-
-                    // Ambil daftar warna (Color) → Bisa kosong
-                    let colors = this.colorInput.split(',').map(c => c.trim().toUpperCase()).filter(Boolean);
-                    if (colors.length === 0) colors = [''];
-
-                    // Ambil daftar panjang lengan (Arm) → Bisa kosong
-                    let arms = this.armInput.split(',').map(a => a.trim().toUpperCase()).filter(Boolean);
-                    if (arms.length === 0) arms = [''];
-
-                    // Buat semua kombinasi
-                    this.combinations = [];
-                    for (let size of sizes) {
-                        for (let color of colors) {
-                            for (let arm of arms) {
-                                this.combinations.push({
-                                    size,
-                                    color,
-                                    arm,
-                                    stock: 0,
-                                    price: 0
-                                });
-                            }
-                        }
-                    }
-                }
-            };
-        }
-    </script>
+    <script></script>
 </x-app-layout>

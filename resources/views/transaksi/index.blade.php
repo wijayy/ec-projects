@@ -51,8 +51,7 @@
                 </x-action-a>
             </form>
         </div>
-        <x-primary-button class="items-center gap-2 h-fit" x-data=""
-            @click.prevent="$dispatch('open-modal', 'tambah-transaksi')">
+        <x-primary-a href="{{ route('transaksi.create') }}" class="items-center gap-2 h-fit" x-data="">
 
             <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
@@ -61,7 +60,7 @@
                     <path d="M4 12H9M12 12H20M12 4V20" stroke="#000000" stroke-width="1.5" stroke-linecap="round"
                         stroke-linejoin="round"></path>
                 </g>
-            </svg><span>Tambah Transaksi</span></x-primary-button>
+            </svg><span>Tambah Transaksi</span></x-primary-a>
     </div>
     <div class="grid grid-cols-1 gap-4 mt-4 sm:grid-cols-2 xl:grid-cols-4">
         <div class="flex items-center w-full h-20 p-4 rounded-lg min-h-40 shadow-mine">
@@ -226,12 +225,14 @@
     </form>
 
     <div class="mt-4 overflow-x-auto ">
-        <table class="table-auto shadow-mine border-spacing-4 border-separate min-w-[1200px] w-full">
+        <table class="table-auto shadow-mine border-spacing-4 border-separate min-w-[1400px] w-full">
             <thead>
                 <tr>
                     <th>No Transaksi</th>
                     <th>Customer</th>
                     <th>Produk</th>
+                    <th>Diskon</th>
+                    <th>Total</th>
                     <th>Status</th>
                     <th>Status Pembayaran</th>
                     <th>Platform Transaksi</th>
@@ -254,16 +255,18 @@
                                 @endforeach
                             </div>
                         </td>
+                        <td>{{ $item->diskon }} </td>
+                        <td>{{ number_format($item->total / 1000, 0, ',', '.') . 'K' }} </td>
                         <td>{{ $item->status }} </td>
-                        <td>{{ $item->lunas ? 'Lunas' : "DP $item->dp" }} </td>
+                        <td>{{ $item->lunas ? 'Lunas' : 'DP ' . number_format($item->dp / 1000, 0, ',', '.') . 'K' }}
+                        </td>
                         <td>{{ $item->platform }} </td>
                         <td>{{ $item->provinsi->nama }} </td>
-                        <td>{{ $item->selesai?->format('d-m-Y') }} </td>
+                        <td>{{ $item->selesai?->format('d-m-Y') ?? '-' }} </td>
                         <td>
                             <div class="flex gap-2">
-                                <x-action-a href="" x-data=""
-                                    @click.prevent="$dispatch('open-modal', 'show-transaksi-{{ $loop->iteration }}')"
-                                    class="bg-mine-200 ">
+                                <x-action-a href="{{ route('transaksi.show', ['transaksi' => $item->slug]) }}"
+                                    x-data="" class="bg-mine-200 ">
                                     <x-action-label>Tampilkan</x-action-label>
                                     <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
@@ -280,7 +283,7 @@
                                 </x-action-a>
                                 @if ($item->status != 'selesai')
                                     <x-action-a x-data=""
-                                        @click.prevent="$dispatch('open-modal', 'edit-transaksi-{{ $loop->iteration }}')"
+                                        href="{{ route('transaksi.edit', ['transaksi' => $item->slug]) }}"
                                         class="bg-yellow-400">
                                         <x-action-label>Edit</x-action-label>
                                         <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none"
@@ -323,88 +326,6 @@
     </div>
 
     @foreach ($transaksi as $item)
-        <x-modal name="show-transaksi-{{ $loop->iteration }}" :maxWidth="'5xl'" :title="'Detail Transaksi ' . $item->nomor_transaksi">
-            <div class="flex gap-2">
-                <div class="w-2/3">
-                    <div class="grid grid-cols-1 gap-2 lg:grid-cols-2">
-                        <div class="w-full">
-                            <x-input-label for="customer" :value="__('nama customer')" />
-                            <x-input-show>{{ $item->customer }} </x-input-show>
-                        </div>
-                        <div class="w-full">
-                            <x-input-label for="provinsi" :value="__('provinsi')" />
-                            <x-input-show>{{ $item->provinsi->nama }} </x-input-show>
-                        </div>
-                    </div>
-                    <div class="w-full">
-                        <x-input-label for="catatan" :value="__('catatan')" />
-                        <x-input-show>{{ $item->catatan }} </x-input-show>
-                    </div>
-                    <div class="mt-4 space-y-2">
-                        <x-input-label for="Produk" class="w-full" :value="__('Produk')" />
-                        @foreach ($item->transaksiDetail as $itm)
-                            <div class="flex items-center w-full gap-2">
-                                <x-input-show class="w-full">{{ $itm->nama }} | {{ $itm->size }}
-                                    {{ $itm->color ? "- $itm->color" : '' }} {{ $itm->arm ? "- $itm->arm" : '' }} |
-                                    {{ $itm->qty }} Pcs
-                                </x-input-show>
-                            </div>
-                        @endforeach
-                    </div>
-                    <div class="mt-4 space-y-2">
-                        <x-input-label for="File" class="w-full" :value="__('File')" />
-                        <div class="grid grid-cols-2 gap-2 lg:grid-cols-4">
-                            @foreach ($item->transaksiFoto as $itm)
-                                <div class="relative w-full aspect-square">
-                                    @php
-                                        $filePath = storage_path('app/public/' . $itm->file);
-                                        $isImage = in_array(pathinfo($itm->file, PATHINFO_EXTENSION), [
-                                            'jpg',
-                                            'jpeg',
-                                            'png',
-                                            'gif',
-                                            'webp',
-                                        ]);
-                                    @endphp
-
-                                    @if ($isImage)
-                                        <div class="relative w-full bg-center bg-no-repeat bg-cover rounded-lg aspect-square"
-                                            style="background-image: url({{ asset('storage/' . $itm->file) }})">
-
-                                        </div>
-                                    @else
-                                        <div
-                                            class="relative flex items-center justify-center w-full p-2 bg-gray-200 rounded-lg aspect-square">
-                                            <span class="text-sm text-gray-700">{{ $itm->filename }}</span>
-                                        </div>
-                                    @endif
-                                    <div class="absolute top-0 z-30 p-1 -translate-x-full cursor-pointer left-full ">
-                                        <x-action-a href="{{ route('download', ['file' => $itm->id]) }}"
-                                            class="size-10 bg-mine-200">
-                                            <x-action-label>Download</x-action-label>
-                                            <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none"
-                                                xmlns="http://www.w3.org/2000/svg">
-                                                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                                <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
-                                                    stroke-linejoin="round"></g>
-                                                <g id="SVGRepo_iconCarrier">
-                                                    <path
-                                                        d="M5.625 15C5.625 14.5858 5.28921 14.25 4.875 14.25C4.46079 14.25 4.125 14.5858 4.125 15H5.625ZM4.875 16H4.125H4.875ZM19.275 15C19.275 14.5858 18.9392 14.25 18.525 14.25C18.1108 14.25 17.775 14.5858 17.775 15H19.275ZM11.1086 15.5387C10.8539 15.8653 10.9121 16.3366 11.2387 16.5914C11.5653 16.8461 12.0366 16.7879 12.2914 16.4613L11.1086 15.5387ZM16.1914 11.4613C16.4461 11.1347 16.3879 10.6634 16.0613 10.4086C15.7347 10.1539 15.2634 10.2121 15.0086 10.5387L16.1914 11.4613ZM11.1086 16.4613C11.3634 16.7879 11.8347 16.8461 12.1613 16.5914C12.4879 16.3366 12.5461 15.8653 12.2914 15.5387L11.1086 16.4613ZM8.39138 10.5387C8.13662 10.2121 7.66533 10.1539 7.33873 10.4086C7.01212 10.6634 6.95387 11.1347 7.20862 11.4613L8.39138 10.5387ZM10.95 16C10.95 16.4142 11.2858 16.75 11.7 16.75C12.1142 16.75 12.45 16.4142 12.45 16H10.95ZM12.45 5C12.45 4.58579 12.1142 4.25 11.7 4.25C11.2858 4.25 10.95 4.58579 10.95 5H12.45ZM4.125 15V16H5.625V15H4.125ZM4.125 16C4.125 18.0531 5.75257 19.75 7.8 19.75V18.25C6.61657 18.25 5.625 17.2607 5.625 16H4.125ZM7.8 19.75H15.6V18.25H7.8V19.75ZM15.6 19.75C17.6474 19.75 19.275 18.0531 19.275 16H17.775C17.775 17.2607 16.7834 18.25 15.6 18.25V19.75ZM19.275 16V15H17.775V16H19.275ZM12.2914 16.4613L16.1914 11.4613L15.0086 10.5387L11.1086 15.5387L12.2914 16.4613ZM12.2914 15.5387L8.39138 10.5387L7.20862 11.4613L11.1086 16.4613L12.2914 15.5387ZM12.45 16V5H10.95V16H12.45Z"
-                                                        fill="#000000"></path>
-                                                </g>
-                                            </svg>
-                                        </x-action-a>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-
-                <div class="w-1/3">
-                </div>
-            </div>
-        </x-modal>
         @if ($item->status != 'selesai')
             <x-modal name="hapus-transaksi-{{ $loop->iteration }}" :title="'Hapus Transaksi ' . $item->nomor_transaksi" :show="false" focusable>
                 <form method="post" action="{{ route('transaksi.destroy', ['transaksi' => $item->slug]) }}"
@@ -427,304 +348,6 @@
                     </div>
                 </form>
             </x-modal>
-            <x-modal name="edit-transaksi-{{ $loop->iteration }}" :maxWidth="'5xl'" :title="'Edit Transaksi ' . $item->nomor_transaksi"
-                :show="false" focusable>
-                <form action="{{ route('transaksi.update', ['transaksi' => $item->slug]) }}"
-                    enctype="multipart/form-data" method="post" class="flex flex-wrap gap-4 md:flex-nowrap"
-                    x-data="{
-                        items: {{ json_encode($item->transaksiDetail) ?? '[]' }},
-
-                        addItem() {
-                            this.items.push({
-                                produk_id: 0,
-                                qty: 0,
-                                price: 0,
-                            });
-                        },
-                        removeItem(index) {
-                            this.items.splice(index, 1);
-                        },
-                        updatePrice(index) {
-                            let select = document.querySelectorAll('[id=produk_id]')[index];
-                            let harga = select.options[select.selectedIndex].getAttribute('data-harga');
-                            this.items[index].price = harga ? parseFloat(harga) : 0;
-                        },
-                        get totalPrice() {
-                            return this.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
-                        }
-                    }">
-                    @csrf
-                    @method('put')
-                    @foreach ($errors->all() as $message)
-                        <li>{{ $message }} </li>
-                    @endforeach
-
-
-                    <div class="w-full md:w-2/3">
-
-                        <div class="grid w-full grid-cols-1 gap-4 lg:grid-cols-2">
-                            <div class="w-full">
-                                <x-input-label for="customer" :value="__('nama customer')" />
-                                <x-text-input id="customer" class="block w-full mt-1" type="text"
-                                    name="customer" :value="old('customer')" required autofocus autocomplete="customer" />
-
-                                <x-input-error :messages="$errors->tambahTransaksi->get('customer')" class="mt-2" />
-                            </div>
-                            <div class="w-full">
-                                <x-input-label for="provinsi_id" :value="__('provinsi')" />
-                                <x-select-input name="provinsi_id" id="provinsi_id">
-                                    @foreach ($provinsi as $item)
-                                        <x-select-option value="{{ $item->id }}"
-                                            :selected="old('provinsi_id') == $item->id">{{ $item->nama }}
-                                        </x-select-option>
-                                    @endforeach
-                                </x-select-input>
-
-                                <x-input-error :messages="$errors->tambahTransaksi->get('size')" class="mt-2" />
-                            </div>
-                        </div>
-                        <div class="w-full">
-                            <x-input-label for="catatan" :value="__('nama catatan')" />
-                            <textarea
-                                class="w-full p-1 mt-1 border rounded-md shadow-sm h-fit border-mine-200 focus:border-indigo-500 focus:ring-mine-200"
-                                name="catatan" id="catatan" cols="20" rows="2">{{ old('catatan', '') }}</textarea>
-                            <x-input-error :messages="$errors->tambahTransaksi->get('catatan')" class="mt-2" />
-                        </div>
-
-                        <div class="space-y-2">
-                            <!-- Input Fields -->
-                            <template x-for="(item, index) in items" :key="index">
-                                <div class="flex items-end gap-2" x-init="updatePrice(index)">
-                                    <div class="w-4/5">
-                                        <x-input-label for="produk_id" :value="__('Produk')" />
-                                        <x-select-input @change="updatePrice(index)" ::name="'produk[' + index + '][produk_id]'"
-                                            x-model="item.produk_id" id="produk_id">
-                                            @foreach ($stok as $item)
-                                                <x-select-option :data-harga="$item->harga" value="{{ $item->produk_id }}"
-                                                    :selected="old('produk_id') == $item->produk_id">{{ "{$item->produk->nama} | {$item->size} " }}
-                                                    {{ $itm->color ?? false ? "- $itm->color" : '' }}
-                                                    {{ $itm->arm ?? false ? "- $itm->arm" : '' }}
-                                                </x-select-option>
-                                            @endforeach
-                                        </x-select-input>
-
-                                        <x-input-error :messages="$errors->tambahTransaksi->get('size')" class="mt-2" />
-                                    </div>
-                                    <div class="w-1/5">
-                                        <x-input-label for="qty" :value="__('Qty')" />
-                                        <x-text-input @input="updatePrice(index)" id="qty"
-                                            class="block w-full mt-1" type="number" ::name="'produk[' + index + '][qty]'"
-                                            x-model="item.qty" :value="old('qty')" required autofocus
-                                            autocomplete="qty" />
-                                        <x-input-error :messages="$errors->tambahTransaksi->get('qty')" class="mt-2" />
-                                    </div>
-                                    <x-action-a class="p-1 cursor-pointer size-10 bg-rose-500" x-data=""
-                                        @click.prevent="removeItem">
-                                        <x-action-label>Hapus</x-action-label>
-                                        <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
-                                                stroke-linejoin="round"></g>
-                                            <g id="SVGRepo_iconCarrier">
-                                                <path
-                                                    d="M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M14 10V17M10 10V17"
-                                                    stroke="#000000" stroke-width="1" stroke-linecap="round"
-                                                    stroke-linejoin="round"></path>
-                                            </g>
-                                        </svg>
-                                    </x-action-a>
-                                </div>
-                            </template>
-
-                            <!-- Tombol Tambah Input -->
-                            <button type="button" @click="addItem"
-                                class="flex justify-center w-full mt-2 text-white border border-black border-dashed rounded h-7">
-                                <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                                    <g id="SVGRepo_iconCarrier">
-                                        <path
-                                            d="M12 6C12.5523 6 13 6.44772 13 7V11H17C17.5523 11 18 11.4477 18 12C18 12.5523 17.5523 13 17 13H13V17C13 17.5523 12.5523 18 12 18C11.4477 18 11 17.5523 11 17V13H7C6.44772 13 6 12.5523 6 12C6 11.4477 6.44772 11 7 11H11V7C11 6.44772 11.4477 6 12 6Z"
-                                            fill="#000000"></path>
-                                        <path fill-rule="evenodd" clip-rule="evenodd"
-                                            d="M2 4.5C2 3.11929 3.11929 2 4.5 2H19.5C20.8807 2 22 3.11929 22 4.5V19.5C22 20.8807 20.8807 22 19.5 22H4.5C3.11929 22 2 20.8807 2 19.5V4.5ZM4.5 4C4.22386 4 4 4.22386 4 4.5V19.5C4 19.7761 4.22386 20 4.5 20H19.5C19.7761 20 20 19.7761 20 19.5V4.5C20 4.22386 19.7761 4 19.5 4H4.5Z"
-                                            fill="#000000"></path>
-                                    </g>
-                                </svg>
-                            </button>
-                        </div>
-                        <div x-data="{
-                            items: {{ json_encode($item->transaksiFoto) ?? '[]' }},
-
-                            addItem() {
-                                this.items.push({
-                                    file: '',
-
-                                });
-                            },
-                            removeItem(index) {
-                                this.items.splice(index, 1);
-                            }
-                        }" class="mt-4 space-y-2">
-                            <!-- Input Fields -->
-                            <div class="grid items-end grid-cols-2 gap-2 md:grid-cols-4">
-                                <template x-for="(item, index) in items" :key="index">
-                                    <div class="relative" x-data="{
-                                        image: '',
-                                        text: 'file ' + (index + 1),
-                                        label: 'file' + (index + 1),
-                                        lbl: true,
-                                        fileName: '',
-                                        imagePreview(event) {
-                                            const file = event.target.files[0];
-                                            if (!file) {
-                                                this.lbl = true;
-                                                return;
-                                            }
-                                            if (file.type.startsWith('image/')) {
-                                                this.image = URL.createObjectURL(file);
-                                                this.fileName = ''; // Reset file name jika gambar
-                                            } else {
-                                                this.image = ''; // Reset image jika bukan gambar
-                                                this.fileName = file.name; // Simpan nama file
-                                            }
-                                            this.lbl = false;
-                                        }
-                                    }">
-                                        <x-input-label ::for="label" x-text="text" />
-                                        <div
-                                            class="relative flex w-full mt-1 text-center rounded-md shadow-md aspect-square">
-                                            <img :src="image" :alt="text"
-                                                class="absolute top-0 left-0 z-10 object-cover rounded-md size-full"
-                                                x-show="image">
-                                            <!-- Tampilkan Nama File Jika Bukan Gambar -->
-                                            <span
-                                                class="absolute text-gray-700 transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-                                                x-show="fileName" x-text="fileName"></span>
-                                            <input type="file" :id="label"
-                                                :name="'files[' + index + '][file]'" @change="imagePreview(event)"
-                                                class="sr-only">
-                                            <label :for="label"
-                                                :class="{ 'opacity-100': (lbl), 'opacity-0': !lbl }"
-                                                class="absolute top-0 left-0 z-20 flex items-center justify-center w-full h-full bg-transparent border border-black border-dashed rounded-md cursor-pointer ALIGN text-sky-500 hover:text-blue-700"
-                                                x-text="text"></label>
-                                            <x-action-a
-                                                class="absolute z-30 p-1 cursor-pointer top-2 left-2 size-10 bg-rose-500"
-                                                x-data="" @click.prevent="removeItem">
-                                                <x-action-label>Hapus</x-action-label>
-                                                <svg width="24px" height="24px" viewBox="0 0 24 24"
-                                                    fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
-                                                        stroke-linejoin="round">
-                                                    </g>
-                                                    <g id="SVGRepo_iconCarrier">
-                                                        <path
-                                                            d="M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M14 10V17M10 10V17"
-                                                            stroke="#000000" stroke-width="1" stroke-linecap="round"
-                                                            stroke-linejoin="round"></path>
-                                                    </g>
-                                                </svg>
-                                            </x-action-a>
-                                        </div>
-                                        <x-input-error :messages="$errors->get('image')" class="mt-2" />
-                                    </div>
-                                </template>
-                                <button type="button" @click="addItem"
-                                    class="flex items-center justify-center w-full text-white border border-black border-dashed rounded aspect-square">
-                                    <svg width="48px" height="48px" viewBox="0 0 24 24" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round">
-                                        </g>
-                                        <g id="SVGRepo_iconCarrier">
-                                            <path
-                                                d="M12 6C12.5523 6 13 6.44772 13 7V11H17C17.5523 11 18 11.4477 18 12C18 12.5523 17.5523 13 17 13H13V17C13 17.5523 12.5523 18 12 18C11.4477 18 11 17.5523 11 17V13H7C6.44772 13 6 12.5523 6 12C6 11.4477 6.44772 11 7 11H11V7C11 6.44772 11.4477 6 12 6Z"
-                                                fill="#000000"></path>
-                                            <path fill-rule="evenodd" clip-rule="evenodd"
-                                                d="M2 4.5C2 3.11929 3.11929 2 4.5 2H19.5C20.8807 2 22 3.11929 22 4.5V19.5C22 20.8807 20.8807 22 19.5 22H4.5C3.11929 22 2 20.8807 2 19.5V4.5ZM4.5 4C4.22386 4 4 4.22386 4 4.5V19.5C4 19.7761 4.22386 20 4.5 20H19.5C19.7761 20 20 19.7761 20 19.5V4.5C20 4.22386 19.7761 4 19.5 4H4.5Z"
-                                                fill="#000000"></path>
-                                        </g>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="sticky w-full space-y-4 md:w-1/3" x-data="{ status: 'selesai', diskon: 0 }">
-                        <div class="w-full">
-                            <x-input-label for="status" :value="__('status')" />
-                            <x-select-input name="status" id="status" x-model="status">
-                                @foreach ($status as $item)
-                                    <x-select-option value="{{ $item }}"
-                                        :selected="old('status') == $item">{{ $item }}
-                                    </x-select-option>
-                                @endforeach
-                            </x-select-input>
-                            <x-input-error :messages="$errors->tambahTransaksi->get('status')" class="mt-2" />
-                        </div>
-                        <div class="w-full" x-show="status !== 'selesai'" x-transition:enter="ease-out duration-300"
-                            x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                            x-transition:leave="ease-in duration-200"
-                            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                            x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
-                            <x-input-label for="selesai" :value="__('estimasi selesai')" />
-                            <x-text-input id="selesai" class="block w-full mt-1" type="date" name="selesai"
-                                :value="old('selesai')" autofocus autocomplete="selesai" />
-                            <x-input-error :messages="$errors->tambahTransaksi->get('selesai')" class="mt-2" />
-                        </div>
-                        <div class="w-full">
-                            <x-input-label for="diskon" :value="__('diskon(%)')" />
-                            <x-text-input id="diskon" x-model="diskon" class="block w-full mt-1" type="number"
-                                name="diskon" :value="old('diskon')" required autofocus autocomplete="diskon" />
-                            <x-input-error :messages="$errors->tambahTransaksi->get('diskon')" class="mt-2" />
-                        </div>
-
-                        <div class="w-full">
-                            <x-input-label for="platform" :value="__('Platform transaksi')" />
-                            <x-select-input name="platform" id="platform">
-                                @foreach ($platform as $key => $item)
-                                    <x-select-option value="{{ $key }}"
-                                        :selected="old('platform') == $key">{{ $key }}
-                                    </x-select-option>
-                                @endforeach
-                            </x-select-input>
-                            <x-input-error :messages="$errors->tambahTransaksi->get('platform')" class="mt-2" />
-                        </div>
-                        <div class="w-full">
-                            <x-input-label for="payment" :value="__('metode pembayaran')" />
-                            <x-select-input name="payment" id="payment">
-                                <x-select-option value="cash" :selected="old('payment') == 'cash'">cash
-                                </x-select-option>
-                                <x-select-option value="tranfer" :selected="old('payment') == 'transfer'">transfer
-                                </x-select-option>
-                            </x-select-input>
-                            <x-input-error :messages="$errors->tambahTransaksi->get('payment')" class="mt-2" />
-                        </div>
-
-                        <div class="">
-                            <div class="flex justify-between">
-                                <div class="">Jumlah Transaksi</div>
-                                <div class="" x-text="(totalPrice/100)+'K'"></div>
-                            </div>
-                            <div class="flex justify-between pb-2 border-b-2 border-mine-200">
-                                <div class="">Discount</div>
-                                <div class="" x-text="(totalPrice*(diskon/100))/100+'K'"></div>
-                            </div>
-                            <div class="flex justify-between">
-                                <div class="">Total Transaksi</div>
-                                <div class="" x-text="(((100-diskon)/100)*totalPrice)/100+'K'"></div>
-                                <input type="hidden" name="total" :value="((100 - diskon) / 100) * totalPrice">
-                            </div>
-                        </div>
-                        <div class="flex justify-center w-full">
-                            <x-primary-button class="mx-auto mt-4">Submit</x-primary-button>
-                        </div>
-                    </div>
-                </form>
-            </x-modal>
         @endif
     @endforeach
 
@@ -733,297 +356,6 @@
         <div class="">Terdapat {{ $popup }} transaksi yang harus diselesaikan hari ini!</div>
     </x-modal>
 
-    <x-modal name="tambah-transaksi" :title="'Tambah Transaksi'" :show="$errors->tambahTransaksi->any()" :maxWidth="'7xl'">
-        <form action="{{ route('transaksi.store') }}" enctype="multipart/form-data" method="post"
-            class="flex flex-wrap gap-4 md:flex-nowrap" x-data="{
-                items: [{
-                    produk_id: 0,
-                    qty: 0,
-                    price: 0,
-                }],
 
-                addItem() {
-                    this.items.push({
-                        produk_id: 0,
-                        qty: 0,
-                        price: 0,
-                    });
-                },
-                removeItem(index) {
-                    this.items.splice(index, 1);
-                },
-                updatePrice(index) {
-                    let select = document.querySelectorAll('[id=produk_id]')[index];
-                    let harga = select.options[select.selectedIndex].getAttribute('data-harga');
-                    this.items[index].price = harga ? parseFloat(harga) : 0;
-                },
-                get totalPrice() {
-                    return this.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
-                }
-            }">
-            @csrf
-            @foreach ($errors->all() as $message)
-                <li>{{ $message }} </li>
-            @endforeach
-
-
-            <div class="w-full md:w-2/3">
-
-                <div class="grid w-full grid-cols-1 gap-4 lg:grid-cols-2">
-                    <div class="w-full">
-                        <x-input-label for="customer" :value="__('nama customer')" />
-                        <x-text-input id="customer" class="block w-full mt-1" type="text" name="customer"
-                            :value="old('customer')" required autofocus autocomplete="customer" />
-
-                        <x-input-error :messages="$errors->tambahTransaksi->get('customer')" class="mt-2" />
-                    </div>
-                    <div class="w-full">
-                        <x-input-label for="provinsi_id" :value="__('provinsi')" />
-                        <x-select-input name="provinsi_id" id="provinsi_id">
-                            @foreach ($provinsi as $item)
-                                <x-select-option value="{{ $item->id }}" :selected="old('provinsi_id') == $item->id">{{ $item->nama }}
-                                </x-select-option>
-                            @endforeach
-                        </x-select-input>
-
-                        <x-input-error :messages="$errors->tambahTransaksi->get('size')" class="mt-2" />
-                    </div>
-                </div>
-                <div class="w-full">
-                    <x-input-label for="catatan" :value="__('nama catatan')" />
-                    <textarea
-                        class="w-full p-1 mt-1 border rounded-md shadow-sm h-fit border-mine-200 focus:border-indigo-500 focus:ring-mine-200"
-                        name="catatan" id="catatan" cols="20" rows="2">{{ old('catatan', '') }}</textarea>
-                    <x-input-error :messages="$errors->tambahTransaksi->get('catatan')" class="mt-2" />
-                </div>
-
-                <div class="space-y-2">
-                    <!-- Input Fields -->
-                    <template x-for="(item, index) in items" :key="index">
-                        <div class="flex items-end gap-2">
-                            <div class="w-4/5">
-                                <x-input-label for="produk_id" :value="__('Produk')" />
-                                <x-select-input @change="updatePrice(index)" ::name="'produk[' + index + '][produk_id]'"
-                                    x-model="item.produk_id" id="produk_id">
-                                    @foreach ($stok as $item)
-                                        <x-select-option :data-harga="$item->harga" value="{{ $item->produk_id }}"
-                                            :selected="old('produk_id') == $item->produk_id">{{ "{$item->produk->nama} | {$item->size} " }}
-                                            {{ $itm->color ?? false ? "- $itm->color" : '' }}
-                                            {{ $itm->arm ?? false ? "- $itm->arm" : '' }}
-                                        </x-select-option>
-                                    @endforeach
-                                </x-select-input>
-
-                                <x-input-error :messages="$errors->tambahTransaksi->get('size')" class="mt-2" />
-                            </div>
-                            <div class="w-1/5">
-                                <x-input-label for="qty" :value="__('Qty')" />
-                                <x-text-input @input="updatePrice(index)" id="qty" class="block w-full mt-1"
-                                    type="number" ::name="'produk[' + index + '][qty]'" x-model="item.qty" :value="old('qty')" required
-                                    autofocus autocomplete="qty" />
-                                <x-input-error :messages="$errors->tambahTransaksi->get('qty')" class="mt-2" />
-                            </div>
-                            <x-action-a class="p-1 cursor-pointer size-10 bg-rose-500" x-data=""
-                                @click.prevent="removeItem">
-                                <x-action-label>Hapus</x-action-label>
-                                <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                                    <g id="SVGRepo_iconCarrier">
-                                        <path
-                                            d="M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M14 10V17M10 10V17"
-                                            stroke="#000000" stroke-width="1" stroke-linecap="round"
-                                            stroke-linejoin="round"></path>
-                                    </g>
-                                </svg>
-                            </x-action-a>
-                        </div>
-                    </template>
-
-                    <!-- Tombol Tambah Input -->
-                    <button type="button" @click="addItem"
-                        class="flex justify-center w-full mt-2 text-white border border-black border-dashed rounded h-7">
-                        <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                            <g id="SVGRepo_iconCarrier">
-                                <path
-                                    d="M12 6C12.5523 6 13 6.44772 13 7V11H17C17.5523 11 18 11.4477 18 12C18 12.5523 17.5523 13 17 13H13V17C13 17.5523 12.5523 18 12 18C11.4477 18 11 17.5523 11 17V13H7C6.44772 13 6 12.5523 6 12C6 11.4477 6.44772 11 7 11H11V7C11 6.44772 11.4477 6 12 6Z"
-                                    fill="#000000"></path>
-                                <path fill-rule="evenodd" clip-rule="evenodd"
-                                    d="M2 4.5C2 3.11929 3.11929 2 4.5 2H19.5C20.8807 2 22 3.11929 22 4.5V19.5C22 20.8807 20.8807 22 19.5 22H4.5C3.11929 22 2 20.8807 2 19.5V4.5ZM4.5 4C4.22386 4 4 4.22386 4 4.5V19.5C4 19.7761 4.22386 20 4.5 20H19.5C19.7761 20 20 19.7761 20 19.5V4.5C20 4.22386 19.7761 4 19.5 4H4.5Z"
-                                    fill="#000000"></path>
-                            </g>
-                        </svg>
-                    </button>
-                </div>
-                <div x-data="{
-                    items: [{
-                        file: '',
-
-                    }],
-
-                    addItem() {
-                        this.items.push({
-                            file: '',
-
-                        });
-                    },
-                    removeItem(index) {
-                        this.items.splice(index, 1);
-                    }
-                }" class="mt-4 space-y-2">
-                    <!-- Input Fields -->
-                    <div class="grid items-end grid-cols-2 gap-2 md:grid-cols-4">
-                        <template x-for="(item, index) in items" :key="index">
-                            <div class="relative" x-data="{
-                                image: '',
-                                text: 'file ' + (index + 1),
-                                label: 'file' + (index + 1),
-                                lbl: true,
-                                fileName: '',
-                                imagePreview(event) {
-                                    const file = event.target.files[0];
-                                    if (!file) {
-                                        this.lbl = true;
-                                        return;
-                                    }
-                                    if (file.type.startsWith('image/')) {
-                                        this.image = URL.createObjectURL(file);
-                                        this.fileName = ''; // Reset file name jika gambar
-                                    } else {
-                                        this.image = ''; // Reset image jika bukan gambar
-                                        this.fileName = file.name; // Simpan nama file
-                                    }
-                                    this.lbl = false;
-                                }
-                            }">
-                                <x-input-label ::for="label" x-text="text" />
-                                <div class="relative flex w-full mt-1 text-center rounded-md shadow-md aspect-square">
-                                    <img :src="image" :alt="text"
-                                        class="absolute top-0 left-0 z-10 object-cover rounded-md size-full"
-                                        x-show="image">
-                                    <!-- Tampilkan Nama File Jika Bukan Gambar -->
-                                    <span
-                                        class="absolute text-gray-700 transform -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-                                        x-show="fileName" x-text="fileName"></span>
-                                    <input type="file" :id="label" :name="'files[' + index + '][file]'"
-                                        @change="imagePreview(event)" class="sr-only">
-                                    <label :for="label" :class="{ 'opacity-100': (lbl), 'opacity-0': !lbl }"
-                                        class="absolute top-0 left-0 z-20 flex items-center justify-center w-full h-full bg-transparent border border-black border-dashed rounded-md cursor-pointer ALIGN text-sky-500 hover:text-blue-700"
-                                        x-text="text"></label>
-                                    <x-action-a
-                                        class="absolute z-30 p-1 cursor-pointer top-2 left-2 size-10 bg-rose-500"
-                                        x-data="" @click.prevent="removeItem">
-                                        <x-action-label>Hapus</x-action-label>
-                                        <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                            <g id="SVGRepo_tracerCarrier" stroke-linecap="round"
-                                                stroke-linejoin="round">
-                                            </g>
-                                            <g id="SVGRepo_iconCarrier">
-                                                <path
-                                                    d="M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M14 10V17M10 10V17"
-                                                    stroke="#000000" stroke-width="1" stroke-linecap="round"
-                                                    stroke-linejoin="round"></path>
-                                            </g>
-                                        </svg>
-                                    </x-action-a>
-                                </div>
-                                <x-input-error :messages="$errors->get('image')" class="mt-2" />
-                            </div>
-                        </template>
-                        <button type="button" @click="addItem"
-                            class="flex items-center justify-center w-full text-white border border-black border-dashed rounded aspect-square">
-                            <svg width="48px" height="48px" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                                <g id="SVGRepo_iconCarrier">
-                                    <path
-                                        d="M12 6C12.5523 6 13 6.44772 13 7V11H17C17.5523 11 18 11.4477 18 12C18 12.5523 17.5523 13 17 13H13V17C13 17.5523 12.5523 18 12 18C11.4477 18 11 17.5523 11 17V13H7C6.44772 13 6 12.5523 6 12C6 11.4477 6.44772 11 7 11H11V7C11 6.44772 11.4477 6 12 6Z"
-                                        fill="#000000"></path>
-                                    <path fill-rule="evenodd" clip-rule="evenodd"
-                                        d="M2 4.5C2 3.11929 3.11929 2 4.5 2H19.5C20.8807 2 22 3.11929 22 4.5V19.5C22 20.8807 20.8807 22 19.5 22H4.5C3.11929 22 2 20.8807 2 19.5V4.5ZM4.5 4C4.22386 4 4 4.22386 4 4.5V19.5C4 19.7761 4.22386 20 4.5 20H19.5C19.7761 20 20 19.7761 20 19.5V4.5C20 4.22386 19.7761 4 19.5 4H4.5Z"
-                                        fill="#000000"></path>
-                                </g>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="sticky w-full space-y-4 md:w-1/3" x-data="{ status: 'selesai', diskon: 0 }">
-                <div class="w-full">
-                    <x-input-label for="status" :value="__('status')" />
-                    <x-select-input name="status" id="status" x-model="status">
-                        @foreach ($status as $item)
-                            <x-select-option value="{{ $item }}" :selected="old('status') == $item">{{ $item }}
-                            </x-select-option>
-                        @endforeach
-                    </x-select-input>
-                    <x-input-error :messages="$errors->tambahTransaksi->get('status')" class="mt-2" />
-                </div>
-                <div class="w-full" x-show="status !== 'selesai'" x-transition:enter="ease-out duration-300"
-                    x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                    x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                    x-transition:leave="ease-in duration-200"
-                    x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                    x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
-                    <x-input-label for="selesai" :value="__('estimasi selesai')" />
-                    <x-text-input id="selesai" class="block w-full mt-1" type="date" name="selesai"
-                        :value="old('selesai')" autofocus autocomplete="selesai" />
-                    <x-input-error :messages="$errors->tambahTransaksi->get('selesai')" class="mt-2" />
-                </div>
-                <div class="w-full">
-                    <x-input-label for="diskon" :value="__('diskon(%)')" />
-                    <x-text-input id="diskon" x-model="diskon" class="block w-full mt-1" type="number"
-                        name="diskon" :value="old('diskon')" required autofocus autocomplete="diskon" />
-                    <x-input-error :messages="$errors->tambahTransaksi->get('diskon')" class="mt-2" />
-                </div>
-
-                <div class="w-full">
-                    <x-input-label for="platform" :value="__('Platform transaksi')" />
-                    <x-select-input name="platform" id="platform">
-                        @foreach ($platform as $key => $item)
-                            <x-select-option value="{{ $key }}" :selected="old('platform') == $key">{{ $key }}
-                            </x-select-option>
-                        @endforeach
-                    </x-select-input>
-                    <x-input-error :messages="$errors->tambahTransaksi->get('platform')" class="mt-2" />
-                </div>
-                <div class="w-full">
-                    <x-input-label for="payment" :value="__('metode pembayaran')" />
-                    <x-select-input name="payment" id="payment">
-                        <x-select-option value="cash" :selected="old('payment') == 'cash'">cash
-                        </x-select-option>
-                        <x-select-option value="tranfer" :selected="old('payment') == 'transfer'">transfer
-                        </x-select-option>
-                    </x-select-input>
-                    <x-input-error :messages="$errors->tambahTransaksi->get('payment')" class="mt-2" />
-                </div>
-
-                <div class="">
-                    <div class="flex justify-between">
-                        <div class="">Jumlah Transaksi</div>
-                        <div class="" x-text="(totalPrice/100)+'K'"></div>
-                    </div>
-                    <div class="flex justify-between pb-2 border-b-2 border-mine-200">
-                        <div class="">Discount</div>
-                        <div class="" x-text="(totalPrice*(diskon/100))/100+'K'"></div>
-                    </div>
-                    <div class="flex justify-between">
-                        <div class="">Total Transaksi</div>
-                        <div class="" x-text="(((100-diskon)/100)*totalPrice)/100+'K'"></div>
-                        <input type="hidden" name="total" :value="((100 - diskon) / 100) * totalPrice">
-                    </div>
-                </div>
-                <div class="flex justify-center w-full">
-                    <x-primary-button class="mx-auto mt-4">Submit</x-primary-button>
-                </div>
-            </div>
-        </form>
-    </x-modal>
+    <script></script>
 </x-app-layout>

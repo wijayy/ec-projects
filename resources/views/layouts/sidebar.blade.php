@@ -82,7 +82,9 @@
                     <i class='text-lg bx bx-log-out'></i>
                 </x-nav-link>
             </form>
-            <div class=""></div>
+            <div class="">
+
+            </div>
         </div>
     </div>
 </div>

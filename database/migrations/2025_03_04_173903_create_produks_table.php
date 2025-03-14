@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('nama');
             $table->string('slug');
             $table->string('size');
-            $table->string('color');
-            $table->string('arm');
+            $table->string('color')->nullable();
+            $table->string('arm')->nullable();
             $table->string('deskripsi');
             $table->timestamps();
         });

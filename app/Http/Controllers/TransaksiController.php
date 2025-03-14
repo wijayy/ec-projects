@@ -48,7 +48,9 @@ class TransaksiController extends Controller
      */
     public function create()
     {
-        //
+        $provinsi = Provinsi::all();
+        $stok = Stok::orderBy('produk_id',)->get();
+        return view('transaksi.create', compact('provinsi', 'stok'));
     }
 
     /**
@@ -56,18 +58,22 @@ class TransaksiController extends Controller
      */
     public function store(StoreTransaksiRequest $request)
     {
-        $validated = $request->validateWithBag('tambahTransaksi', $request->rules());
+        $validated = $request->validated();
         // dd($request->file('files'));
         try {
             DB::beginTransaction();
             $validated['nomor_transaksi'] = date('Ymd') . fake()->randomLetter() . fake()->randomLetter() . fake()->randomLetter();
             $validated['nomor_transaksi'] = strtoupper($validated['nomor_transaksi']);
 
+            $validated['total'] = 0;
+
             $transaksi = Transaksi::create($validated);
+            $total = 0;
 
             foreach ($validated['produk'] as $key => $item) {
                 $item['transaksi_id'] = $transaksi->id;
                 $stok = Stok::find($item['produk_id']);
+                $total += $stok->harga;
                 $item['nama'] = $stok->produk->nama;
                 $item['deskripsi'] = $stok->produk->deskripsi;
                 $item['size'] = $stok->size;
@@ -75,7 +81,11 @@ class TransaksiController extends Controller
                 $item['arm'] = $stok->arm;
                 $item['harga'] = $stok->harga;
 
+                if ($stok->stok < $item['qty']) {
+                    throw new \Exception("Jumlah stok Produk kurang, silahkan tambahkan stok terlebih dahulu!");
+                }
                 $stok->decrement('stok', $item['qty']);
+
 
                 TransaksiDetail::create($item);
             }
@@ -94,6 +104,8 @@ class TransaksiController extends Controller
                 }
                 // dd('masuk 3');
             }
+
+            $transaksi->update(['total' => $total * (100 - $transaksi->diskon) / 100]);
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -112,7 +124,7 @@ class TransaksiController extends Controller
      */
     public function show(Transaksi $transaksi)
     {
-        //
+        return view('transaksi.show', compact('transaksi'));
     }
 
     /**
@@ -120,7 +132,9 @@ class TransaksiController extends Controller
      */
     public function edit(Transaksi $transaksi)
     {
-        //
+        $provinsi = Provinsi::all();
+        $stok = Stok::orderBy('produk_id',)->get();
+        return view('transaksi.edit', compact('transaksi', 'provinsi', 'stok'));
     }
 
     /**

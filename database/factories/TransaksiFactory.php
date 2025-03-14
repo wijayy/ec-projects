@@ -30,7 +30,7 @@ class TransaksiFactory extends Factory
             'payment' => $payment[mt_rand(0, 1)],
             'catatan' => 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Aliquid, magnam!',
             'provinsi_id' => Provinsi::factory(),
-            'created_at' => fake()->date()
+            'created_at' => fake()->dateTimeBetween('2020-01-01', 'now'),
         ];
     }
 }

@@ -24,8 +24,9 @@ class StoreTransaksiRequest extends FormRequest
         return [
             'customer' => 'required|string',
             'provinsi_id' => 'required',
-            'total' => 'required',
             'catatan' => "present",
+            'lunas' => "required|boolean",
+            'dp' => 'required_if:lunas,0',
             'selesai' => 'required_unless:status,selesai|nullable|date',
             'status' => 'required|in:selesai,diproses,belum diproses',
             'diskon' => 'required|integer',
@@ -36,7 +37,7 @@ class StoreTransaksiRequest extends FormRequest
             'produk.*.produk_id' => 'required',
             'produk.*.qty' => 'required|integer',
 
-            'files' => 'nullable|array',
+            'files' => 'present|array',
             'files.*.file' => 'required|file',
 
 

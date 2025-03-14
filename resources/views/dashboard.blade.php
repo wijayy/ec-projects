@@ -54,7 +54,7 @@
                             <td class="p-1 text-center border border-mine-200">{{ $item->nama }} </td>
                             <td class="p-1 text-center border border-mine-200">
                                 <div class="flex flex-wrap gap-2">
-                                    @foreach ($item->stok->where('stok', '<=', 5) as $itm)
+                                    @foreach ($item->stoks->where('stok', '<=', 5) as $itm)
                                         <div
                                             class="px-1 rounded h-fit shadow-mine  {{ $itm->stok <= 5 ? 'bg-mine-300 text-white' : 'bg-mine-100' }}">
                                             {{ $itm->size }} {{ $itm->color ? "- $itm->color" : '' }}

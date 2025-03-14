@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\HakAkses;
 use App\Models\Produk;
+use App\Models\ProdukFoto;
 use App\Models\Provinsi;
 use App\Models\Role;
 use App\Models\RolesHakAkses;
@@ -75,6 +76,7 @@ class DatabaseSeeder extends Seeder
 
         Produk::factory(20)->create();
         Stok::factory(100)->recycle(Produk::all())->create();
+        ProdukFoto::factory(100)->recycle(Produk::all())->create();
 
         Transaksi::factory(500)->recycle(Provinsi::all())->create();
         TransaksiDetail::factory(1000)->recycle(Transaksi::all())->create();

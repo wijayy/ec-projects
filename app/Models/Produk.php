@@ -33,10 +33,14 @@ class Produk extends Model
     }
 
     protected $guarded = ['id'];
-    protected $with = ['stok'];
+    protected $with = ['stoks', 'produkFoto'];
 
-    public function stok(): HasMany
+    public function stoks(): HasMany
     {
         return $this->hasMany(Stok::class);
+    }
+    public function produkFoto(): HasMany
+    {
+        return $this->hasMany(ProdukFoto::class);
     }
 }

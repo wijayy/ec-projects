@@ -19,6 +19,9 @@ class ProdukFactory extends Factory
         return [
             'nama' => fake()->sentence(2, false),
             'deskripsi' => fake()->sentences(1, true),
+            'size' => 'S,M,L,XL,XXL,XXXL',
+            'color' => "hitam,putih,merah",
+            'arm' => 'pendek,panjang'
         ];
     }
 }
