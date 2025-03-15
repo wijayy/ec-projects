@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Produk;
+use App\Models\Stok;
 use App\Models\Transaksi;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -15,11 +17,7 @@ return new class extends Migration
         Schema::create('transaksi_details', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Transaksi::class);
-            $table->string('nama');
-            $table->string('deskripsi');
-            $table->string('size');
-            $table->string('color')->nullable();
-            $table->string('arm')->nullable();
+            $table->foreignIdFor(Stok::class);
             $table->integer('qty');
             $table->integer('harga');
             $table->timestamps();

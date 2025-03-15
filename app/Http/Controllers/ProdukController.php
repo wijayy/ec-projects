@@ -42,7 +42,7 @@ class ProdukController extends Controller
             'size' => "required|string",
             'color' => "nullable|string",
             "arm" => 'nullable|array',
-            "files" => 'present|array',
+            "files" => 'nullable|array',
             "variasi" => 'nullable|array',
             'variasi.*.size' => 'nullable|string',
             'variasi.*.arm' => 'nullable|string',
@@ -63,7 +63,7 @@ class ProdukController extends Controller
                 Stok::create($item);
             }
 
-            if (!is_null($validated['files'])) {
+            if (!empty($validated['files'])) {
                 // dd('masuk 1');
                 foreach ($validated['files'] as $key => $item) {
                     $item['produk_id'] = $produk->id;
@@ -110,7 +110,7 @@ class ProdukController extends Controller
             'size' => "required|string",
             'color' => "nullable|string",
             "arm" => 'nullable|array',
-            "files" => 'present|array',
+            "files" => 'nullable|array',
             "variasi" => 'nullable|array',
             'variasi.*.size' => 'nullable|string',
             'variasi.*.arm' => 'nullable|string',
@@ -122,17 +122,49 @@ class ProdukController extends Controller
 
         try {
             DB::beginTransaction();
-            $produk->stoks->each(function ($item) {
-                $item->delete();
-            });
+
             // $produk->produkFoto->delete();
 
+            $existingStocks = Stok::withTrashed()
+                ->where('produk_id', $produk->id)
+                ->get()
+                ->keyBy(fn($item) => $item->size . '-' . $item->color . '-' . $item->arm);
 
-            foreach ($validated['variasi'] as $key => $item) {
-                $item['produk_id'] = $produk->id;
+            $inputKeys = [];
 
-                Stok::create($item);
+            foreach ($request->variasi as $stock) {
+                $key = $stock['size'] . '-' . $stock['color'] . '-' . $stock['arm'];
+                $inputKeys[] = $key; // Simpan key variasi yang dikirim dalam request
+
+                if ($existingStocks->has($key)) {
+                    $existingStock = $existingStocks[$key];
+
+                    if ($existingStock->trashed()) {
+                        $existingStock->restore(); // Restore jika sebelumnya terhapus
+                    }
+
+                    $existingStock->update([
+                        'stok'  => $stock['stok'],
+                        'harga' => $stock['harga']
+                    ]);
+                } else {
+                    Stok::create([
+                        'produk_id' => $produk->id,
+                        'size'       => $stock['size'],
+                        'color'      => $stock['color'],
+                        'arm'        => $stock['arm'],
+                        'stok'       => $stock['stok'],
+                        'harga'      => $stock['harga']
+                    ]);
+                }
             }
+
+            // Hapus variasi yang tidak ada di input baru (Soft Delete)
+            $existingStocks->each(function ($existingStock, $key) use ($inputKeys) {
+                if (!in_array($key, $inputKeys)) {
+                    $existingStock->delete(); // Soft delete hanya jika tidak ada di input baru
+                }
+            });
 
             // Ambil semua gambar yang ada di database sebelum update
             // Ambil gambar lama dari database
@@ -202,10 +234,14 @@ class ProdukController extends Controller
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
-            // Hapus gambar baru yang sudah diupload sebelum error terjadi
-            foreach ($gambarBaru as $id => $gambar) {
-                if (!isset($gambarLama[$id])) {
-                    Storage::disk('public')->delete($gambar);
+
+            if (!empty($gambarBaru)) {
+                # code...
+                // Hapus gambar baru yang sudah diupload sebelum error terjadi
+                foreach ($gambarBaru as $id => $gambar) {
+                    if (!isset($gambarLama[$id])) {
+                        Storage::disk('public')->delete($gambar);
+                    }
                 }
             }
             if (config('app.debug') == true) {

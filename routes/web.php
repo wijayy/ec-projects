@@ -50,43 +50,45 @@ Route::get('/dashboard', function () {
         ->get();
     // dd($stok);
     return view('dashboard', compact('transaksi', 'years', 'totals', 'transaksiMonth', 'topYear', 'topMonthYear', 'provinsi', 'produk', 'stok'));
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified', 'permission:dashboard'])->name('dashboard');
 
-Route::resource('produk', ProdukController::class);
+// Route::resource('produk', ProdukController::class);
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
-    Route::get('/produk/create', [ProdukController::class, 'create'])->name('produk.create');
-    Route::post('/produk', [ProdukController::class, 'store'])->name('produk.store');
-    Route::get('/produk/{produk}', [ProdukController::class, 'show'])->name('produk.show');
-    Route::get('/produk/{produk}/edit', [ProdukController::class, 'edit'])->name('produk.edit');
-    Route::put('/produk/{produk}', [ProdukController::class, 'update'])->name('produk.update');
-    Route::delete('/produk/{produk}', [ProdukController::class, 'destroy'])->name('produk.destroy');
-    Route::get('/produk/{produk}/update-stok', [ProdukController::class, 'editStok'])->name('produk.edit-stok');
-    Route::post('/produk/{produk}/update-stok', [ProdukController::class, 'updateStok'])->name('produk.update-stok');
+    Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index')->middleware('permission:create-produk,edit-produk,delete-produk,update-stok');
+    Route::get('/produk/create', [ProdukController::class, 'create'])->name('produk.create')->middleware('permission:create-produk');
+    Route::post('/produk', [ProdukController::class, 'store'])->name('produk.store')->middleware('permission:create-produk');
+    // Route::get('/produk/{produk}', [ProdukController::class, 'show'])->name('produk.show')->middleware('permission:');
+    Route::get('/produk/{produk}/edit', [ProdukController::class, 'edit'])->name('produk.edit')->middleware('permission:edit-produk');
+    Route::put('/produk/{produk}', [ProdukController::class, 'update'])->name('produk.update')->middleware('permission:edit-produk');
+    Route::delete('/produk/{produk}', [ProdukController::class, 'destroy'])->name('produk.destroy')->middleware('permission:delete-produk');
+    Route::get('/produk/{produk}/update-stok', [ProdukController::class, 'editStok'])->name('produk.edit-stok')->middleware('permission:update-stok');
+    Route::post('/produk/{produk}/update-stok', [ProdukController::class, 'updateStok'])->name('produk.update-stok')->middleware('permission:update-stok');
 
-    Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index');
-    Route::get('/transaksi/create', [TransaksiController::class, 'create'])->name('transaksi.create');
-    Route::post('/transaksi', [TransaksiController::class, 'store'])->name('transaksi.store');
-    Route::get('/transaksi/{transaksi}', [TransaksiController::class, 'show'])->name('transaksi.show');
-    Route::get('/transaksi/{transaksi}/edit', [TransaksiController::class, 'edit'])->name('transaksi.edit');
-    Route::put('/transaksi/{transaksi}', [TransaksiController::class, 'update'])->name('transaksi.update');
-    Route::delete('/transaksi/{transaksi}', [TransaksiController::class, 'destroy'])->name('transaksi.destroy');
+    Route::get('/transaksi', [TransaksiController::class, 'index'])->name('transaksi.index')->middleware('permission:create-transaksi,edit-transaksi,delete-transaksi');
+    Route::get('/transaksi/create', [TransaksiController::class, 'create'])->name('transaksi.create')->middleware('permission:create-transaksi');
+    Route::post('/transaksi', [TransaksiController::class, 'store'])->name('transaksi.store')->middleware('permission:create-transaksi');
+    Route::get('/transaksi/{transaksi}', [TransaksiController::class, 'show'])->name('transaksi.show')->middleware('permission:show-transaksi');
+    Route::get('/transaksi/{transaksi}/edit', [TransaksiController::class, 'edit'])->name('transaksi.edit')->middleware('permission:edit-transaksi');
+    Route::put('/transaksi/{transaksi}', [TransaksiController::class, 'update'])->name('transaksi.update')->middleware('permission:edit-transaksi');
+    Route::delete('/transaksi/{transaksi}', [TransaksiController::class, 'destroy'])->name('transaksi.destroy')->middleware('permission:delete-transaksi');
 
 
-    Route::post('produk/{produk}/update-stok', [ProdukController::class, 'updateStok'])->name('produk.update-stok');
+    // Route::post('produk/{produk}/update-stok', [ProdukController::class, 'updateStok'])->name('produk.update-stok')->middleware('permission:');
     Route::get('download/{file}', function (TransaksiFoto $file) {
         $filePath = public_path('storage/' . $file->file); // Path file// Nama file yang akan diunduh
         return response()->download($filePath, $file->filename);
-    })->name('download');
+    })->name('download')->middleware('permission:show-transaksi');
+    Route::get('analitik', [AnalitikController::class, 'index'])->name('analitik')->middleware('permission:analitik');
+});
 
+Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('role', RoleController::class);
     Route::resource('users', UserController::class);
-    Route::get('analitik', [AnalitikController::class, 'index'])->name('analitik');
 });
 
 require __DIR__ . '/auth.php';

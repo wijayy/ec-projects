@@ -19,8 +19,9 @@
                 <x-input-label :required="false" for="Produk" class="w-full" :value="__('Produk')" />
                 @foreach ($transaksi->transaksiDetail as $itm)
                     <div class="flex items-center w-full gap-2">
-                        <x-input-show class="w-full">{{ $itm->nama }} | {{ $itm->size }}
-                            {{ $itm->color ? "- $itm->color" : '' }} {{ $itm->arm ? "- $itm->arm" : '' }} |
+                        <x-input-show class="w-full">{{ $itm->stok->produk->nama }} | {{ $itm->stok->size }}
+                            {{ $itm->stok->color ? "- {$itm->stok->color}" : '' }}
+                            {{ $itm->stok->arm ? "- {$itm->stok->arm}" : '' }} |
                             {{ $itm->qty }} Pcs
                         </x-input-show>
                     </div>
@@ -110,16 +111,19 @@
             @endphp
                 <div class="flex justify-between mt-4">
                     <div class="text-base">Jumlah Transaksi</div>
-                    <div class="text-lg">{{ number_format($total / 1000, 0, ',', '.') . 'K' }} </div>
+                    <div class="text-lg">{{ number_format($transaksi->total / 1000, 0, ',', '.') . 'K' }} </div>
                 </div>
                 <div class="flex justify-between border-b-2 border-black">
                     <div class="text-base">Diskon</div>
                     <div class="text-lg">
-                        {{ number_format(($total * $transaksi->diskon) / 100 / 1000, 0, ',', '.') . 'K' }} </div>
+                        {{ number_format(($transaksi->total * $transaksi->diskon) / 100 / 1000, 0, ',', '.') . 'K' }}
+                    </div>
                 </div>
                 <div class="flex justify-between">
                     <div class="text-base">Total Transaksi</div>
-                    <div class="text-lg">{{ number_format($transaksi->total / 1000, 0, ',', '.') . 'K' }} </div>
+                    <div class="text-lg">
+                        {{ number_format(((100 - $transaksi->diskon) * $transaksi->total) / 100000, 0, ',', '.') . 'K' }}
+                    </div>
                 </div>
             </div>
         </div>

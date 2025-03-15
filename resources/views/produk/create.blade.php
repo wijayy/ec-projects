@@ -184,12 +184,12 @@
         </div>
         <div class="overflow-x-auto">
             <div class="flex flex-col w-full mt-6 min-w-[500px]">
-                <div class="flex w-full gap-4 p-2 ">
-                    <div class="w-1/5">Size</div>
-                    <div class="w-1/5">Color</div>
-                    <div class="w-1/5">Arm</div>
-                    <div class="w-1/5">Stok</div>
-                    <div class="w-1/5">Harga</div>
+                <div class="flex w-full gap-4 px-2 ">
+                    <div class="w-1/5"><x-input-label :required="false">Size</x-input-label></div>
+                    <div class="w-1/5"><x-input-label :required="false">Color</x-input-label></div>
+                    <div class="w-1/5"><x-input-label :required="false">Arm</x-input-label></div>
+                    <div class="w-1/5"><x-input-label>Stok</x-input-label></div>
+                    <div class="w-1/5"><x-input-label>Harga</x-input-label></div>
                 </div>
                 <template x-for="(combo, index) in combinations" :key="index">
                     <div class="flex w-full gap-4 p-2 min-w-96">

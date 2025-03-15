@@ -89,7 +89,33 @@ class RoleController extends Controller
      */
     public function update(UpdateRoleRequest $request, Role $role)
     {
-        //
+        $validated = $request->validated();
+        try {
+            DB::beginTransaction();
+
+            foreach ($role->roleHakAkses as $key => $item) {
+                $item->delete();
+            }
+
+            foreach ($validated['option'] as $key => $item) {
+                RolesHakAkses::create([
+                    'role_id' => $role->id,
+                    'hak_akses_id' => $item
+                ]);
+            }
+
+            $role->update($validated);
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            if (config('app.debug') == true) {
+                throw $th;
+            } else {
+                return back()->with('error', $th->getMessage());
+            }
+        }
+
+        return back()->with('success', "Role Berhasil diedit");
     }
 
     /**

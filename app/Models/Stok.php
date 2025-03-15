@@ -6,16 +6,24 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Stok extends Model
 {
     /** @use HasFactory<\Database\Factories\StokFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
     protected $guarded = ['id'];
+    protected $with = ['transaksiDetail'];
 
     public function produk(): BelongsTo
     {
         return $this->belongsTo(Produk::class);
+    }
+
+    public function transaksiDetail(): HasMany
+    {
+        return $this->hasMany(TransaksiDetail::class);
     }
 
     public function scopeFilters(Builder  $query, array $filters)

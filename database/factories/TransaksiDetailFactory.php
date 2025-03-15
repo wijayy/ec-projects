@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Stok;
 use App\Models\Transaksi;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -17,16 +18,9 @@ class TransaksiDetailFactory extends Factory
      */
     public function definition(): array
     {
-        $size = ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
-        $color = ['Hitam', "Putih", null];
-        $arm = ['Pendek', "Panjang", null];
         return [
             'transaksi_id' => Transaksi::factory(),
-            'nama' => 'p1',
-            'deskripsi' => 'd1',
-            'size' => $size[mt_rand(0, 5)],
-            'color' => $color[mt_rand(0, 2)],
-            'arm' => $arm[mt_rand(0, 2)],
+            'stok_id' => Stok::factory(),
             'qty' => mt_rand(3, 20),
             'harga' => mt_rand(50, 200) * 1000,
         ];

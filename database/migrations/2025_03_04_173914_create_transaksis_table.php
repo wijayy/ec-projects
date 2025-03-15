@@ -27,7 +27,7 @@ return new class extends Migration
             $table->foreignIdFor(Provinsi::class);
             $table->dateTime('selesai')->nullable();
             $table->boolean('lunas')->default(1);
-            $table->integer('dp')->default(0);
+            $table->integer('dp')->nullable();
             $table->timestamps();
         });
     }

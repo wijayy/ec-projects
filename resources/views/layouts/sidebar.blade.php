@@ -82,9 +82,21 @@
                     <i class='text-lg bx bx-log-out'></i>
                 </x-nav-link>
             </form>
-            <div class="">
-
-            </div>
+            <a href="{{ route('profile.edit') }}" class="flex items-center gap-1">
+                <div class="h-10 aspect-square">
+                    @if (Auth::user()->image)
+                        <img src="{{ asset('storage/' . Auth::user()->image) }}" class="rounded-full size-full"
+                            alt="">
+                    @endif
+                    <div class="flex items-center justify-center bg-gray-400 rounded-full">
+                        <i class='text-3xl bx bx-user'></i>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="">{{ Auth::user()->name }}</div>
+                    <div class="">{{ Auth::user()->role?->nama }}</div>
+                </div>
+            </a>
         </div>
     </div>
 </div>

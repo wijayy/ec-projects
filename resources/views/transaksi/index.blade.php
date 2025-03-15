@@ -182,7 +182,7 @@
                 <input type="hidden" name="tahub" value="{{ request()->get('tahun') }}">
             @endif
             <div class="w-full">
-                <x-input-label for="provinsi" :value="__('provinsi')" />
+                <x-input-label :required="false" for="provinsi" :value="__('provinsi')" />
                 <x-select-input id="provinsi" class="text-base" name="provinsi">
                     <x-select-option value="">Pilih</x-select-option>
                     @foreach ($provinsi as $item)
@@ -192,7 +192,7 @@
                 </x-select-input>
             </div>
             <div class="w-full">
-                <x-input-label for="status" :value="__('status')" />
+                <x-input-label :required="false" for="status" :value="__('status')" />
                 <x-select-input id="status" class="text-base" name="status">
                     <x-select-option value="">Pilih</x-select-option>
                     @foreach ($status as $item)
@@ -202,7 +202,7 @@
                 </x-select-input>
             </div>
             <div class="w-full">
-                <x-input-label for="platform" :value="__('platform')" />
+                <x-input-label :required="false" for="platform" :value="__('platform')" />
                 <x-select-input id="platform" class="text-base" name="platform">
                     <x-select-option value="">Pilih</x-select-option>
                     @foreach ($platform as $key => $item)
@@ -212,7 +212,7 @@
                 </x-select-input>
             </div>
             <div class="w-full">
-                <x-input-label for="selesai" :value="__('estimasi selesai')" />
+                <x-input-label :required="false" for="selesai" :value="__('estimasi selesai')" />
                 <x-text-input id="selesai" class="block w-full mt-1" type="date" name="selesai"
                     :value="request()->get('selesai')" autocomplete="selesai" />
             </div>
@@ -249,14 +249,17 @@
                         <td>
                             <div class="flex flex-wrap w-full gap-2 min-w-48 max-w-96">
                                 @foreach ($item->transaksiDetail as $itm)
-                                    <div class="p-1 rounded bg-mine-100">{{ $itm->nama }} | {{ $itm->size }}
-                                        {{ $itm->color ?? false ? "- $itm->color" : '' }}
-                                        {{ $itm->arm ?? false ? "- $itm->arm" : '' }} | {{ $itm->qty }} Pcs </div>
+                                    <div class="p-1 rounded bg-mine-100">{{ $itm->stok->produk->nama }} |
+                                        {{ $itm->stok->size }}
+                                        {{ $itm->stok->color ?? false ? "- {$itm->stok->color}" : '' }}
+                                        {{ $itm->stok->arm ?? false ? "- {$itm->stok->arm}" : '' }} |
+                                        {{ $itm->qty }} Pcs </div>
                                 @endforeach
                             </div>
                         </td>
-                        <td>{{ $item->diskon }} </td>
-                        <td>{{ number_format($item->total / 1000, 0, ',', '.') . 'K' }} </td>
+                        <td>{{ $item->diskon }}% </td>
+                        <td>{{ number_format(((100 - $item->diskon) * $item->total) / 100000, 0, ',', '.') . 'K' }}
+                        </td>
                         <td>{{ $item->status }} </td>
                         <td>{{ $item->lunas ? 'Lunas' : 'DP ' . number_format($item->dp / 1000, 0, ',', '.') . 'K' }}
                         </td>

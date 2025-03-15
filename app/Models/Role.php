@@ -40,18 +40,14 @@ class Role extends Model
     {
         return $this->hasMany(User::class);
     }
+
     public function roleHakAkses(): HasMany
     {
         return $this->hasMany(RolesHakAkses::class);
     }
 
-    public function hakAkses()
+    public function permissions()
     {
-        return $this->belongsToMany(
-            HakAkses::class,
-            'roles_hak_akses',  // Nama tabel pivot
-            'role_id',          // FK di tabel pivot yang mengacu ke roles
-            'hak_akses_id'     // FK di tabel pivot yang mengacu ke hak_akses
-        );
+        return $this->belongsToMany(HakAkses::class, 'roles_hak_akses');
     }
 }

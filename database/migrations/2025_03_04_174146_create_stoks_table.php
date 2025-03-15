@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('arm')->nullable();
             $table->integer('stok');
             $table->integer('harga');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

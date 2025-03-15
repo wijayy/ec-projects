@@ -39,6 +39,7 @@ class Produk extends Model
     {
         return $this->hasMany(Stok::class);
     }
+
     public function produkFoto(): HasMany
     {
         return $this->hasMany(ProdukFoto::class);

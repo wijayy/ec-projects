@@ -15,4 +15,8 @@ class TransaksiDetail extends Model
     {
         return $this->belongsTo(Transaksi::class);
     }
+    public function stok()
+    {
+        return $this->belongsTo(Stok::class);
+    }
 }

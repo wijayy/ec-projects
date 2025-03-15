@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'admin@admin.com',
+            'is_admin' => true
         ]);
 
         $provinsi = [
@@ -79,12 +80,59 @@ class DatabaseSeeder extends Seeder
         ProdukFoto::factory(100)->recycle(Produk::all())->create();
 
         Transaksi::factory(500)->recycle(Provinsi::all())->create();
-        TransaksiDetail::factory(1000)->recycle(Transaksi::all())->create();
+        TransaksiDetail::factory(1000)->recycle([Transaksi::all(), Stok::all()])->create();
         TransaksiFoto::factory(1000)->recycle(Transaksi::all())->create();
 
         User::factory(5)->create();
         // Role::factory(5)->create();
-        HakAkses::factory(10)->create();
+        $permission = [
+            [
+                'nama' =>  "create-produk",
+                'deskripsi' => "Menambahkan produk baru ke dalam sistem"
+            ],
+            [
+                'nama' =>  "edit-produk",
+                'deskripsi' => "Mengedit informasi produk yang sudah ada"
+            ],
+            [
+                'nama' =>  "delete-produk",
+                'deskripsi' => "Menghapus produk dari sistem"
+            ],
+            [
+                'nama' =>  "update-stok",
+                'deskripsi' => "Memperbarui jumlah stok produk"
+            ],
+
+            [
+                'nama' =>  "create-transaksi",
+                'deskripsi' => "Membuat transaksi baru"
+            ],
+            [
+                'nama' =>  "edit-transaksi",
+                'deskripsi' => "Mengedit transaksi yang sudah ada"
+            ],
+            [
+                'nama' =>  "delete-transaksi",
+                'deskripsi' => "Menghapus transaksi dari sistem"
+            ],
+            [
+                'nama' =>  "show-transaksi",
+                'deskripsi' => "Melihat detail transaksi"
+            ],
+
+            [
+                'nama' =>  "dashboard",
+                'deskripsi' => "Mengakses dan melihat halaman dashboard utama"
+            ],
+            [
+                'nama' =>  "analitik",
+                'deskripsi' => "Melihat laporan dan analisis data"
+            ]
+        ];
+
+        foreach ($permission as $key => $item) {
+            HakAkses::factory(1)->create($item);
+        }
 
         foreach (Role::all() as $key => $role) {
             foreach (HakAkses::all() as $key => $hakAkses) {

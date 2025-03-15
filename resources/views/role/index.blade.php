@@ -116,9 +116,9 @@
     <x-modal :show="false" :title="'Tambah User Baru'" name="tambah-user">
         <form action="{{ route('users.store') }}" method="post">
             @csrf
-            @foreach ($errors->all() as $item)
+            {{-- @foreach ($errors->all() as $item)
                 <li>{{ $item }} </li>
-            @endforeach
+            @endforeach --}}
             <div class="grid grid-cols-3 gap-x-4 gap-y-2">
                 <div class="w-full">
                     <x-input-label for="nama" :value="__('nama')" />
@@ -187,7 +187,7 @@
                 <div class="w-10 text-center">{{ $key + 1 }} </div>
                 <div class="w-1/4">{{ $item->nama }} </div>
                 <div class="flex flex-wrap w-full gap-2">
-                    @foreach ($item->hakAkses as $itm)
+                    @foreach ($item->permissions as $itm)
                         <div class="p-1 rounded-lg bg-mine-100">
                             {{ $itm->nama }}
                         </div>
@@ -234,9 +234,9 @@
                             <form action="{{ route('role.update', ['role' => $item->slug]) }}" method="post">
                                 @csrf
                                 @method('put')
-                                @foreach ($errors->all() as $item)
+                                {{-- @foreach ($errors->all() as $item)
                                     <li>{{ $item }} </li>
-                                @endforeach
+                                @endforeach --}}
                                 <div class="w-full">
                                     <x-input-label for="nama" :value="__('nama Role')" />
                                     <x-text-input id="nama" class="block w-full mt-1" type="text"

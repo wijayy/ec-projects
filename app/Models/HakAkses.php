@@ -36,4 +36,9 @@ class HakAkses extends Model
     {
         return $this->hasMany(RolesHakAkses::class);
     }
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'roles_hak_akses');
+    }
 }

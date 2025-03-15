@@ -40,7 +40,7 @@
                 </div>
             </div>
             <div class="w-full">
-                <x-input-label for="catatan" :value="__('catatan')" />
+                <x-input-label for="catatan" :required="false" :value="__('catatan')" />
                 <textarea
                     class="w-full p-1 mt-1 border rounded-md shadow-sm h-fit border-mine-200 focus:border-indigo-500 focus:ring-mine-200"
                     name="catatan" id="catatan" cols="20" rows="2">{{ old('catatan', '') }}</textarea>
