@@ -10,6 +10,7 @@ use App\Models\Provinsi;
 use App\Models\Stok;
 use App\Models\TransaksiDetail;
 use App\Models\TransaksiFoto;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -113,7 +114,7 @@ class TransaksiController extends Controller
             }
         }
 
-        return back()->with('success', "transaksi berhasil ditambahkan");
+        return redirect(route('transaksi.index'))->with('success', "transaksi berhasil ditambahkan");
     }
 
     /**
@@ -146,62 +147,27 @@ class TransaksiController extends Controller
         try {
             DB::beginTransaction();
 
-            $oldDetails = TransaksiDetail::where('transaksi_id', $transaksi->id)->get();
+            foreach ($transaksi->transaksiDetail as $key => $item) {
+                $stok = Stok::where('id', $item->stok_id)->firstOrFail();
+                $stok->increment('stok', $item->qty);
 
-            // Ambil produk baru dari form
-            $newProducts = collect($request->produk);
-
-            // Simpan semua produk_id dari transaksi baru
-            $newProductIds = $newProducts->pluck('produk_id')->toArray();
-
-            // Loop transaksi lama untuk mengembalikan stok jika produk dihapus atau qty berkurang
-            foreach ($oldDetails as $oldItem) {
-                if (!in_array($oldItem->produk_id, $newProductIds)) {
-                    // Produk dihapus dari transaksi, kembalikan stok sepenuhnya
-                    Stok::where('id', $oldItem->produk_id)->increment('stok', $oldItem->qty);
-                    $oldItem->delete();
-                }
+                $item->delete();
             }
 
-            // Proses setiap produk baru
-            foreach ($newProducts as $item) {
-                $stok = Stok::findOrFail($item['produk_id']);
-                $existingDetail = TransaksiDetail::where('transaksi_id', $transaksi->id)
-                    ->where('stok_id', $item['produk_id'])
-                    ->first();
+            foreach ($request->produk as $key => $item) {
+                $stok = Stok::where('id', $item['produk_id'])->firstOrFail();
 
-                if ($existingDetail) {
-                    $diffQty = $item['qty'] - $existingDetail->qty;
-
-                    if ($diffQty > 0) {
-                        // Tambah qty, cek apakah stok cukup
-                        if ($stok->stok < $diffQty) {
-                            throw new \Exception("Stok untuk produk ID {$stok->id} tidak mencukupi!");
-                        }
-                        $stok->decrement('stok', $diffQty);
-                    } elseif ($diffQty < 0) {
-                        // Kurangi qty, tambahkan kembali ke stok
-                        $stok->increment('stok', abs($diffQty));
-                    }
-
-                    // Update transaksi detail
-                    $existingDetail->update([
-                        'qty' => $item['qty']
-                    ]);
-                } else {
-                    // Produk baru ditambahkan, cek stok dulu
-                    if ($stok->stok < $item['qty']) {
-                        throw new \Exception("Stok untuk produk {$stok->produk->nama} | {$stok->size} {$stok->color} {$stok->arm} tidak mencukupi!");
-                    }
-                    $stok->decrement('stok', $item['qty']);
-
-                    TransaksiDetail::create([
-                        'transaksi_id' => $transaksi->id,
-                        'stok_id' => $item['produk_id'],
-                        'qty' => $item['qty'],
-                        'harga' => $stok->harga
-                    ]);
+                if ($stok->stok < $item['qty']) {
+                    throw new \Exception("Jumlah stok Produk {$stok->produk->nama} | {$stok->size} {$stok->color} {$stok->arm}  kurang, silahkan tambahkan stok terlebih dahulu!");
                 }
+
+                $stok->decrement('stok', $item['qty']);
+
+                $item['transaksi_id'] = $transaksi->id;
+                $item['stok_id'] = $stok->id;
+                $item['harga'] = $stok->harga;
+
+                TransaksiDetail::create($item);
             }
 
 

@@ -132,7 +132,13 @@
             </div>
             <div class="flex flex-col items-center w-3/4">
                 <div class="text-xl text-center md:text-2xl text-wrap">Total Produk Terjual</div>
-                <div class="text-5xl text-mine-200">{{ $transaksi->sum('diskon') }} </div>
+                @php
+                    $sum = 0;
+                    foreach ($transaksi as $key => $item) {
+                        $sum += $item->transaksiDetail->sum('qty');
+                    }
+                @endphp
+                <div class="text-5xl text-mine-200">{{ $sum }} </div>
             </div>
         </div>
 

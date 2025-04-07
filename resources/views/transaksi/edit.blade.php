@@ -125,7 +125,7 @@
                     <template x-for="(item, index) in items" :key="index">
                         <div class="relative" x-data="{
                             image: item.image,
-
+                        
                             text: 'image ' + (index + 1),
                             label: 'image' + (index + 1),
                             lbl: false,
@@ -328,11 +328,7 @@
                 },
 
                 removeItem(index) {
-                    if (this.items[index].id) {
-                        this.items[index].deleted = true; // Tandai sebagai dihapus, tapi tetap tampil
-                    } else {
-                        this.items.splice(index, 1); // Hapus langsung jika bukan data lama
-                    }
+                    this.items.splice(index, 1); // Hapus langsung jika bukan data lama
                     this.calculateGrandTotal();
                 },
 

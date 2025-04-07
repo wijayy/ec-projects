@@ -3,7 +3,7 @@
     <div class="flex items-center justify-between">
         <div class="mt-4 text-2xl font-semibold">Registered Users</div>
         <x-primary-button x-data="" @click.prevent="$dispatch('open-modal', 'tambah-user')">Tambah
-            Produk</x-primary-button>
+            User</x-primary-button>
     </div>
 
     <div class="overflow-x-auto">

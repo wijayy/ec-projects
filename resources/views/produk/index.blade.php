@@ -4,20 +4,27 @@
             Produk</x-primary-a>
     </div>
     <div class="w-full p-4 mt-4 space-y-4 overflow-x-auto rounded-lg shadow-mine">
-        <div class="flex w-full gap-4 p-1 min-w-[700px]">
+        <div class="flex w-full gap-2 p-1 min-w-[700px]">
             <div class="sr-only">Header</div>
             <div class="w-10 text-center">#</div>
-            <div class="w-1/4">Nama Produk</div>
-            <div class="w-1/4">Deskripsi</div>
+            <div class="w-1/5">Nama Produk</div>
+            <div class="w-1/5">Gambar</div>
+            <div class="w-1/5">Deskripsi</div>
             <div class="w-full">Stok</div>
             <div class="w-1/4 text-center">Action</div>
         </div>
         @foreach ($produk as $item)
-            <div class="flex w-full gap-4 p-1 min-w-[700px] rounded-lg odd:bg-white even:bg-stone-100 h-fit">
+            <div class="flex w-full gap-2 p-1 min-w-[700px] rounded-lg odd:bg-white even:bg-stone-100 h-fit">
                 <div class="sr-only">Content</div>
                 <div class="w-10 text-center">{{ $loop->iteration }} </div>
-                <div class="w-1/4">{{ $item->nama }} </div>
-                <div class="w-1/4">{{ $item->deskripsi }} </div>
+                <div class="w-1/5">{{ $item->nama }} </div>
+                <div class="grid w-1/5 grid-cols-3 gap-1" style="">
+                    @foreach ($item->produkFoto as $itm)
+                        <div class="w-full bg-center bg-no-repeat bg-cover rounded aspect-square"
+                            style='background-image: url({{ asset("storage/$itm->image") }});'></div>
+                    @endforeach
+                </div>
+                <div class="w-1/5">{{ $item->deskripsi }} </div>
                 <div class="flex flex-wrap w-full gap-2">
                     @foreach ($item->stoks as $itm)
                         <div
