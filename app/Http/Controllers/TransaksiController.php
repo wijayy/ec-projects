@@ -36,7 +36,9 @@ class TransaksiController extends Controller
         }
 
         $transaksi = $transaksi->get();
-        $popup = $popup->whereDate('selesai', date('Y-m-d'))->whereNot('status', 'selesai')->count();
+        $popup = $popup->whereIn('selesai', [date('Y-m-d'), date('Y-m-d', strtotime('+1 day'))])
+               ->where('status', '!=', 'selesai')
+               ->count();
 
         $provinsi = Provinsi::all();
         $stok = Stok::orderBy('produk_id',)->get();

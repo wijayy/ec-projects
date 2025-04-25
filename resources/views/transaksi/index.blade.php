@@ -29,6 +29,7 @@
     <div class="flex flex-wrap justify-between w-full gap-4">
         <div class="flex items-center gap-4">
             <div class="text-sm text-wrap lg:text-nowrap">Statistik Penjualan</div>
+            <div class="">{{ $popup }} </div>
             <form method="GET" class="flex items-center gap-4 w-fit">
                 <x-select-input class="m-0" required id="bulan" name="bulan" class="w-32">
                     @foreach ($bulan as $item)

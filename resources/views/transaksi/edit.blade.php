@@ -52,8 +52,8 @@
             <div class="mt-4">
                 <template x-for="(item, index) in items" :key="index">
                     <div class="flex items-end justify-between gap-2">
-                        <div class="flex items-center w-full gap-4">
-                            <div class="w-4/5">
+                        <div class="grid items-center w-full grid-cols-5 gap-4">
+                            <div class="col-span-5 lg:col-span-2">
                                 <x-input-label :value="__('Produk')" />
                                 <x-select-input x-model="item.productId" @change="updateTotal(index)" ::name="'produk[' + index + '][produk_id]'">
                                     <x-select-option value="" disabled>Pilih Produk</x-select-option>
@@ -66,7 +66,14 @@
                                     @endforeach
                                 </x-select-input>
                             </div>
-                            <div class="w-1/5">
+                            <div class="col-span-3 lg:col-span-2 ">
+                                <x-input-label :required="false" for="note" :value="__('note')" />
+                                <x-text-input min="1" class="w-full" @input="updateTotal(index)" id="note"
+                                    ::name="'produk[' + index + '][note]'" type="text" x-model="item.note"
+                                     />
+                                <x-input-error :messages="$errors->tambahTransaksi->get('note')" class="mt-2" />
+                            </div>
+                            <div class="col-span-2 lg:col-span-1">
                                 <x-input-label :value="__('Qty')" />
                                 <x-text-input min="1" class="w-full" @input="updateTotal(index)"
                                     ::name="'produk[' + index + '][qty]'" type="number" x-model="item.qty" required />
@@ -125,7 +132,7 @@
                     <template x-for="(item, index) in items" :key="index">
                         <div class="relative" x-data="{
                             image: item.image,
-                        
+
                             text: 'image ' + (index + 1),
                             label: 'image' + (index + 1),
                             lbl: false,
@@ -204,7 +211,7 @@
                 </div>
             </div>
         </div>
-        <div class="sticky w-full space-y-4 md:w-1/3" x-data="{ status: 'selesai', diskon: 0, lunas: 1 }">
+        <div class="sticky w-full space-y-4 md:w-1/3" x-data="{ status: '{{  $transaksi->status }}', diskon: {{ $transaksi->diskon }}, lunas: {{ $transaksi->lunas }} }">
             <div class="w-full">
                 <x-input-label for="status" :value="__('status')" />
                 <x-select-input name="status" id="status" x-model="status">
@@ -223,7 +230,7 @@
                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
                 <x-input-label for="selesai" :value="__('estimasi selesai')" />
                 <x-text-input id="selesai" class="block w-full mt-1" type="date" name="selesai"
-                    :value="old('selesai', $transaksi->selesai)" autofocus autocomplete="selesai" />
+                    value="{{ old('selesai', $transaksi->selesai->format('Y-m-d')) }}" autofocus autocomplete="selesai" />
                 <x-input-error :messages="$errors->tambahTransaksi->get('selesai')" class="mt-2" />
             </div>
             <div class="w-full">
@@ -271,7 +278,7 @@
                 <x-select-input name="payment" id="payment">
                     <x-select-option value="cash" :selected="old('payment', $transaksi->payment) == 'cash'">cash
                     </x-select-option>
-                    <x-select-option value="tranfer" :selected="old('payment', $transaksi->payment) == 'transfer'">transfer
+                    <x-select-option value="transfer" :selected="old('payment', $transaksi->payment) == 'transfer'">transfer
                     </x-select-option>
                 </x-select-input>
                 <x-input-error :messages="$errors->tambahTransaksi->get('payment')" class="mt-2" />
@@ -304,6 +311,7 @@
                 items: existingItems.map(item => ({
                     id: item.id,
                     productId: item.stok_id,
+                    note: item.note,
                     qty: item.qty,
                     price: item.harga,
                     total: item.qty * item.harga

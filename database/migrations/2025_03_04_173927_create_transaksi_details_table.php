@@ -20,6 +20,7 @@ return new class extends Migration
             $table->foreignIdFor(Stok::class);
             $table->integer('qty');
             $table->integer('harga');
+            $table->string('note')->nullable();
             $table->timestamps();
         });
     }

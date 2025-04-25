@@ -11,8 +11,6 @@ use App\Models\Provinsi;
 use App\Models\Stok;
 use App\Models\Transaksi;
 use App\Models\TransaksiFoto;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {

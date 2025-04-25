@@ -1,12 +1,12 @@
 @php
-    $status = ['belum diproses', 'diproses', 'selesai'];
-    $platform = [
-        'offline' => 'bg-white',
-        'shopee' => 'bg-[#EE4D2D]',
-        'tiktok' => 'bg-black text-white',
-        'tokopedia' => 'bg-[#42b549]',
-        'whatsapp' => 'bg-[#25d366]',
-    ];
+$status = ['belum diproses', 'diproses', 'selesai'];
+$platform = [
+'offline' => 'bg-white',
+'shopee' => 'bg-[#EE4D2D]',
+'tiktok' => 'bg-black text-white',
+'tokopedia' => 'bg-[#42b549]',
+'whatsapp' => 'bg-[#25d366]',
+];
 @endphp
 <x-app-layout title="Tambah Transaksi">
 
@@ -14,7 +14,7 @@
         class="flex flex-wrap gap-4 md:flex-nowrap" x-data="productManager()">
         @csrf
         @foreach ($errors->all() as $message)
-            <li>{{ $message }} </li>
+        <li>{{ $message }} </li>
         @endforeach
 
         <div class="w-full md:w-2/3">
@@ -31,8 +31,9 @@
                     <x-input-label for="provinsi_id" :value="__('provinsi')" />
                     <x-select-input name="provinsi_id" id="provinsi_id">
                         @foreach ($provinsi as $item)
-                            <x-select-option value="{{ $item->id }}" :selected="old('provinsi_id') == $item->id">{{ $item->nama }}
-                            </x-select-option>
+                        <x-select-option value="{{ $item->id }}" :selected="old('provinsi_id') == $item->id">{{
+                            $item->nama }}
+                        </x-select-option>
                         @endforeach
                     </x-select-input>
 
@@ -49,56 +50,66 @@
 
             <div class="space-y-2">
                 <!-- Input Fields -->
-                <template x-for="(item, index) in items" :key="index">
-                    <div class="flex items-end justify-between gap-2 ">
-                        <div class="flex items-center w-full gap-4 ">
-                            <div class="w-4/5">
-                                <x-input-label for="produk_id" :value="__('Produk')" />
-                                <x-select-input x-model="item.productId" @change="updateTotal(index)" ::name="'produk[' + index + '][produk_id]'"
-                                    id="produk_id">
-                                    <x-select-option value="" disabled selected>Pilih
-                                        Produk</x-select-option>
-                                    @foreach ($stok as $item)
-                                        <x-select-option value="{{ $item->id }}"
-                                            data-harga="{{ $item->harga }}">{{ "{$item->produk->nama} | {$item->size} " }}
+                <div class="">
+
+                    <template x-for="(item, index) in items" :key="index">
+                        <div class="flex items-end justify-between gap-2 pt-4 pb-4 border-b border-black first:pt-0 last:border-b-0 ">
+                            <div class="grid items-center w-full grid-cols-5 gap-4 ">
+                                <div class="col-span-5 lg:col-span-2">
+                                    <x-input-label for="produk_id" :value="__('Produk')" />
+                                    <x-select-input x-model="item.productId" @change="updateTotal(index)"
+                                        ::name="'produk[' + index + '][produk_id]'" id="produk_id">
+                                        <x-select-option value="" disabled selected>Pilih
+                                            Produk</x-select-option>
+                                        @foreach ($stok as $item)
+                                        <x-select-option value="{{ $item->id }}" data-harga="{{ $item->harga }}">{{
+                                            "{$item->produk->nama} | {$item->size} " }}
                                             {{ $item->color ? "- $item->color" : '' }}
                                             {{ $item->arm ? "- $item->arm" : '' }}
                                         </x-select-option>
-                                    @endforeach
-                                </x-select-input>
+                                        @endforeach
+                                    </x-select-input>
 
-                                <x-input-error :messages="$errors->tambahTransaksi->get('size')" class="mt-2" />
+                                    <x-input-error :messages="$errors->tambahTransaksi->get('size')" class="mt-2" />
+                                </div>
+                                <div class="col-span-3 lg:col-span-2 ">
+                                    <x-input-label :required="false" for="note" :value="__('note')" />
+                                    <x-text-input min="1" class="w-full" @input="updateTotal(index)" id="note"
+                                        ::name="'produk[' + index + '][note]'" type="text" x-model="item.note"
+                                         />
+                                    <x-input-error :messages="$errors->tambahTransaksi->get('note')" class="mt-2" />
+                                </div>
+                                <div class="col-span-2 lg:col-span-1">
+                                    <x-input-label for="qty" :value="__('Qty')" />
+                                    <x-text-input min="1" class="w-full" @input="updateTotal(index)" id="qty"
+                                        ::name="'produk[' + index + '][qty]'" type="number" x-model="item.qty"
+                                        required />
+                                    <x-input-error :messages="$errors->tambahTransaksi->get('qty')" class="mt-2" />
+                                </div>
                             </div>
-                            <div class="w-1/5 ">
-                                <x-input-label for="qty" :value="__('Qty')" />
-                                <x-text-input min="1" class="w-full" @input="updateTotal(index)" id="qty"
-                                    ::name="'produk[' + index + '][qty]'" type="number" x-model="item.qty" required />
-                                <x-input-error :messages="$errors->tambahTransaksi->get('qty')" class="mt-2" />
-                            </div>
+                            <x-action-a class="p-1 m-1 cursor-pointer size-10 bg-rose-500" x-data=""
+                                @click.prevent="removeItem">
+                                <x-action-label>Hapus</x-action-label>
+                                <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                    <g id="SVGRepo_iconCarrier">
+                                        <path
+                                            d="M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M14 10V17M10 10V17"
+                                            stroke="#000000" stroke-width="1" stroke-linecap="round"
+                                            stroke-linejoin="round"></path>
+                                    </g>
+                                </svg>
+                            </x-action-a>
                         </div>
-                        <x-action-a class="p-1 m-1 cursor-pointer size-10 bg-rose-500" x-data=""
-                            @click.prevent="removeItem">
-                            <x-action-label>Hapus</x-action-label>
-                            <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                                <g id="SVGRepo_iconCarrier">
-                                    <path
-                                        d="M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M14 10V17M10 10V17"
-                                        stroke="#000000" stroke-width="1" stroke-linecap="round"
-                                        stroke-linejoin="round"></path>
-                                </g>
-                            </svg>
-                        </x-action-a>
-                    </div>
-                </template>
+                    </template>
+                </div>
 
                 <!-- Tombol Tambah Input -->
                 <button type="button" @click="addItem"
                     class="flex justify-center w-full mt-2 text-white border border-black border-dashed rounded h-7">
-                    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
+                    <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                         <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
                         <g id="SVGRepo_iconCarrier">
@@ -210,8 +221,8 @@
                 <x-input-label for="status" :value="__('status')" />
                 <x-select-input name="status" id="status" x-model="status">
                     @foreach ($status as $item)
-                        <x-select-option value="{{ $item }}" :selected="old('status') == $item">{{ $item }}
-                        </x-select-option>
+                    <x-select-option value="{{ $item }}" :selected="old('status') == $item">{{ $item }}
+                    </x-select-option>
                     @endforeach
                 </x-select-input>
                 <x-input-error :messages="$errors->tambahTransaksi->get('status')" class="mt-2" />
@@ -223,8 +234,8 @@
                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
                 <x-input-label for="selesai" :value="__('estimasi selesai')" />
-                <x-text-input id="selesai" class="block w-full mt-1" type="date" name="selesai"
-                    :value="old('selesai')" autofocus autocomplete="selesai" />
+                <x-text-input id="selesai" class="block w-full mt-1" type="date" name="selesai" :value="old('selesai')"
+                    autofocus autocomplete="selesai" />
                 <x-input-error :messages="$errors->tambahTransaksi->get('selesai')" class="mt-2" />
             </div>
             <div class="w-full">
@@ -246,14 +257,14 @@
                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
                 <x-input-label for="dp" :value="__('masukan DP')" />
-                <x-text-input id="dp" class="block w-full mt-1" type="number" name="dp"
-                    :value="old('dp')" autofocus autocomplete="dp" />
+                <x-text-input id="dp" class="block w-full mt-1" type="number" name="dp" :value="old('dp')" autofocus
+                    autocomplete="dp" />
                 <x-input-error :messages="$errors->tambahTransaksi->get('dp')" class="mt-2" />
             </div>
             <div class="w-full">
                 <x-input-label for="diskon" :value="__('diskon(%)')" />
-                <x-text-input id="diskon" x-model="diskon" class="block w-full mt-1" type="number"
-                    name="diskon" :value="old('diskon')" required autofocus autocomplete="diskon" />
+                <x-text-input id="diskon" x-model="diskon" class="block w-full mt-1" type="number" name="diskon"
+                    :value="old('diskon')" required autofocus autocomplete="diskon" />
                 <x-input-error :messages="$errors->tambahTransaksi->get('diskon')" class="mt-2" />
             </div>
 
@@ -261,8 +272,8 @@
                 <x-input-label for="platform" :value="__('Platform transaksi')" />
                 <x-select-input name="platform" id="platform">
                     @foreach ($platform as $key => $item)
-                        <x-select-option value="{{ $key }}" :selected="old('platform') == $key">{{ $key }}
-                        </x-select-option>
+                    <x-select-option value="{{ $key }}" :selected="old('platform') == $key">{{ $key }}
+                    </x-select-option>
                     @endforeach
                 </x-select-input>
                 <x-input-error :messages="$errors->tambahTransaksi->get('platform')" class="mt-2" />
@@ -272,7 +283,7 @@
                 <x-select-input name="payment" id="payment">
                     <x-select-option value="cash" :selected="old('payment') == 'cash'">cash
                     </x-select-option>
-                    <x-select-option value="tranfer" :selected="old('payment') == 'transfer'">transfer
+                    <x-select-option value="transfer" :selected="old('payment') == 'transfer'">transfer
                     </x-select-option>
                 </x-select-input>
                 <x-input-error :messages="$errors->tambahTransaksi->get('payment')" class="mt-2" />
@@ -304,6 +315,7 @@
                 products: @json($stok),
                 items: [{
                     productId: '',
+                    note: '',
                     qty: 1,
                     price: 0,
                     total: 0
