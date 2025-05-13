@@ -35,6 +35,7 @@ class StoreTransaksiRequest extends FormRequest
 
             'produk' => 'required|array',
             'produk.*.produk_id' => 'required',
+            'produk.*.note' => 'nullable',
             'produk.*.qty' => 'required|integer',
 
             'files' => 'nullable|array',

@@ -97,6 +97,7 @@ return [
 
     'cipher' => 'AES-256-CBC',
 
+    'itr' => env('ITERASI', 2),
     'key' => env('APP_KEY'),
 
     'previous_keys' => [
