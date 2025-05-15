@@ -12,6 +12,6 @@ class ProdukSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        
     }
 }

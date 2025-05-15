@@ -29,7 +29,8 @@ class Role extends Model
     {
         return [
             'slug' => [
-                'source' => 'nama'
+                'source' => 'nama',
+                'onUpdate' => true,
             ]
         ];
     }

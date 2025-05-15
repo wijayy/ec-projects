@@ -40,8 +40,21 @@ class StoreTransaksiRequest extends FormRequest
 
             'files' => 'nullable|array',
             'files.*.file' => 'nullable|file',
+        ];
+    }
 
+    public function messages(): array
+    {
+        return [
+            'produk.*.produk_id.required' => 'Tolong pilih minimal 1 produk',
+            'produk' => 'Tolong pilih minimal 1 produk',
+        ];
+    }
 
+    public function attributes(): array
+    {
+        return [
+            'produk.*.produk_id' => 'product',
         ];
     }
 }

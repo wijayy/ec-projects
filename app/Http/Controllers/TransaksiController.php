@@ -233,6 +233,8 @@ class TransaksiController extends Controller
                 $transaksi->transaksiFoto()->where('id', $id)->delete();
             }
 
+            $transaksi->update($validated);
+
 
             DB::commit();
             return redirect(route('transaksi.index'))->with("success", "Transaksi $transaksi->nomor_transaksi berhasil diupdate");

@@ -13,11 +13,12 @@ $platform = [
     <form action="{{ route('transaksi.store') }}" enctype="multipart/form-data" method="post"
         class="flex flex-wrap gap-4 md:flex-nowrap" x-data="productManager()">
         @csrf
-        @foreach ($errors->all() as $message)
-        <li>{{ $message }} </li>
-        @endforeach
-
         <div class="w-full md:w-2/3">
+            <div class="">
+                @foreach ($errors->all() as $message)
+                <div class="text-red-500 last:mb-4">{{ $message }} </div>
+                @endforeach
+            </div>
 
             <div class="grid w-full grid-cols-1 gap-4 lg:grid-cols-2">
                 <div class="w-full">

@@ -18,7 +18,7 @@ class Stok extends Model
 
     public function produk(): BelongsTo
     {
-        return $this->belongsTo(Produk::class);
+        return $this->belongsTo(Produk::class)->withTrashed();
     }
 
     public function transaksiDetail(): HasMany

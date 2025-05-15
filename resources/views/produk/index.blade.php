@@ -64,7 +64,7 @@
                             </g>
                         </svg>
                     </x-action-a>
-                    <x-action-set :delete="route('profile.destroy')"></x-action-set>
+                    <x-action-set :delete="route('produk.destroy', ['produk'=>$item->slug])"></x-action-set>
                 </div>
             </div>
         @endforeach

@@ -138,6 +138,6 @@ class RoleController extends Controller
                 return back()->with('error', $th->getMessage());
             }
         }
-        return back()->with('success', "Role Berhasil dihapus");
+        return redirect(route('role.index'))->with('success', "Role Berhasil dihapus");
     }
 }

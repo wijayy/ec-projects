@@ -253,7 +253,7 @@ class ProdukController extends Controller
 
 
 
-        return back()->with('success', 'Produk berhasil diedit');
+        return redirect(route('produk.index'))->with('success', 'Produk berhasil diedit');
     }
 
     /**
@@ -302,6 +302,7 @@ class ProdukController extends Controller
      */
     public function destroy(Produk $produk)
     {
-        //
+        $produk->delete();
+        return back()->with('success', 'Produk berhasil dihapus');
     }
 }
